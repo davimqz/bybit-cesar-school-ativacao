@@ -92,13 +92,24 @@ console.log(`      raso  ${poolRaso.address}`);
 // --- Semeando liquidez ------------------------------------------------------
 
 console.log("[4/5] Semeando liquidez...");
-await csr.write.approve([poolFundo.address, SUPPLY_INICIAL]);
-await brlx.write.approve([poolFundo.address, SUPPLY_INICIAL]);
-await poolFundo.write.addLiquidity([POOL_FUNDO_CSR, POOL_FUNDO_BRLX, 0n, 0n]);
 
-await csr.write.approve([poolRaso.address, SUPPLY_INICIAL]);
-await brlx.write.approve([poolRaso.address, SUPPLY_INICIAL]);
-await poolRaso.write.addLiquidity([POOL_RASO_CSR, POOL_RASO_BRLX, 0n, 0n]);
+// Uma transacao por vez, esperando o recibo. `contract.write.*` devolve o hash
+// sem confirmar: em rede real, a transacao seguinte pede o nonce antes de a rede
+// registrar a anterior, as duas saem com o mesmo nonce e o no rejeita a segunda
+// ("replacement transaction underpriced"). No no local os blocos sao instantaneos
+// e o problema nao aparece — e exatamente o tipo de bug que so a Sepolia mostra.
+const confirmar = async (envio: Promise<`0x${string}`>) => {
+  const hash = await envio;
+  return publicClient.waitForTransactionReceipt({ hash });
+};
+
+await confirmar(csr.write.approve([poolFundo.address, SUPPLY_INICIAL]));
+await confirmar(brlx.write.approve([poolFundo.address, SUPPLY_INICIAL]));
+await confirmar(poolFundo.write.addLiquidity([POOL_FUNDO_CSR, POOL_FUNDO_BRLX, 0n, 0n]));
+
+await confirmar(csr.write.approve([poolRaso.address, SUPPLY_INICIAL]));
+await confirmar(brlx.write.approve([poolRaso.address, SUPPLY_INICIAL]));
+await confirmar(poolRaso.write.addLiquidity([POOL_RASO_CSR, POOL_RASO_BRLX, 0n, 0n]));
 
 const slipFundo = await poolFundo.read.previewSwap([csr.address, parseEther("100")]);
 const slipRaso = await poolRaso.read.previewSwap([csr.address, parseEther("100")]);

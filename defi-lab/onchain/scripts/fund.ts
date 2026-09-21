@@ -29,6 +29,19 @@ const publicClient = await viem.getPublicClient();
 const [professor] = await viem.getWalletClients();
 const chainId = await publicClient.getChainId();
 
+/**
+ * Envia e espera o recibo, uma por vez.
+ *
+ * `contract.write.*` devolve o hash sem confirmar. Duas escritas seguidas pedem
+ * o nonce antes de a rede registrar a anterior, saem com o mesmo nonce e o no
+ * rejeita a segunda ("replacement transaction underpriced"). No no local nao
+ * acontece; com a turma inteira em Sepolia, acontece no primeiro aluno.
+ */
+const confirmar = async (envio: Promise<`0x${string}`>) => {
+  const hash = await envio;
+  return publicClient.waitForTransactionReceipt({ hash });
+};
+
 // --- Carrega deployment e lista da turma ------------------------------------
 
 const deploymentPath = join(ROOT, "deployments", `${chainId}.json`);
@@ -115,8 +128,8 @@ for (const [i, aluno] of alunos.entries()) {
       await publicClient.waitForTransactionReceipt({ hash });
     }
 
-    await csr.write.transfer([aluno, CSR_POR_ALUNO]);
-    await brlx.write.transfer([aluno, BRLX_POR_ALUNO]);
+    await confirmar(csr.write.transfer([aluno, CSR_POR_ALUNO]));
+    await confirmar(brlx.write.transfer([aluno, BRLX_POR_ALUNO]));
 
     console.log(`${prefixo}  ok`);
     ok++;
