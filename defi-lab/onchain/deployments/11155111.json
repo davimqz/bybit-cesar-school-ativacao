@@ -1,14 +1,18 @@
 {
   "chainId": 11155111,
   "network": "sepolia",
-  "deployedAt": "2026-09-21T19:53:39.587Z",
-  "deployBlock": "11753061",
+  "deployedAt": "2026-09-22T09:56:41.565Z",
+  "deployBlock": "11757152",
   "professor": "0x1bc27feb21f516f882e29ecf2e8ba8be3c971521",
   "contracts": {
-    "csr": "0x304cff558e91cd99e12536ecc2edc12fffc8adf7",
-    "brlx": "0x3d1830625061c3b1c796ba83ddd1c36d04a96444",
-    "gasFaucet": "0x6f23f6fd5a9d06eb4d1edbeb9680825c2875a7b2",
-    "poolFundo": "0x9356e145fcaeda45c0c556a6a80733a9c283991d",
-    "poolRaso": "0xbecbd95e126fa7fe9750fce48adfbedb9ca5a56c"
+    "csr": "0x59e6c524581316ef36c3716cc03aac1f9c8b97fb",
+    "brlx": "0x8afb00a08d4a8fe79c590e867a8cecb5552adec0",
+    "gasFaucet": "0x57f9ff38fdfee084a6f9a4c1959f70d7e2d95693",
+    "poolFundo": "0xa05370929e07b4ed5135e4a3608898135b01f2ad",
+    "poolRaso": "0x01638b4880c2349dcdbac55ae0603aee87c86e9e",
+    "orderBook": "0x666546598d619ba798d36ccfe5270ce2b640c43e",
+    "staking": "0x396612fafa1162b3a6bb89a42853b54434654383",
+    "escrow": "0x0acecec309c8b19f26d4f2ac3d87aae8481ba526",
+    "crowdfunding": "0xf630745001893c6fcac2b96864d8f8c3f7da5a87"
   }
 }

@@ -9,7 +9,6 @@
     "node": "hardhat node",
     "deploy:local": "hardhat run scripts/deploy.ts --network hardhatMainnet",
     "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia",
-    "seed:sepolia": "hardhat run scripts/seed.ts --network sepolia",
     "fund:sepolia": "hardhat run scripts/fund.ts --network sepolia",
     "deploy:localhost": "hardhat run scripts/deploy.ts --network localhost",
     "fund:localhost": "hardhat run scripts/fund.ts --network localhost",
