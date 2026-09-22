@@ -20,7 +20,7 @@ export function CurvaXY({
 }) {
   if (!reserve0 || !reserve1 || reserve0 === 0n || reserve1 === 0n) {
     return (
-      <div className="flex h-64 items-center justify-center text-sm text-slate-400">
+      <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
         Pool ainda sem liquidez.
       </div>
     );
@@ -42,7 +42,8 @@ export function CurvaXY({
   const PAD = 28;
 
   const px = (x: number) => PAD + ((x - xMin) / (xMax - xMin)) * (W - 2 * PAD);
-  const py = (y: number) => H - PAD - ((y - yMin) / (yMax - yMin)) * (H - 2 * PAD);
+  const py = (y: number) =>
+    H - PAD - ((y - yMin) / (yMax - yMin)) * (H - 2 * PAD);
 
   const pontos: string[] = [];
   const PASSOS = 120;
@@ -53,12 +54,36 @@ export function CurvaXY({
 
   return (
     <div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Curva x vezes y igual a k">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="w-full"
+        role="img"
+        aria-label="Curva x vezes y igual a k"
+      >
         {/* eixos */}
-        <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="#cbd5e1" strokeWidth="1" />
-        <line x1={PAD} y1={PAD} x2={PAD} y2={H - PAD} stroke="#cbd5e1" strokeWidth="1" />
+        <line
+          x1={PAD}
+          y1={H - PAD}
+          x2={W - PAD}
+          y2={H - PAD}
+          stroke="#cbd5e1"
+          strokeWidth="1"
+        />
+        <line
+          x1={PAD}
+          y1={PAD}
+          x2={PAD}
+          y2={H - PAD}
+          stroke="#cbd5e1"
+          strokeWidth="1"
+        />
 
-        <polyline points={pontos.join(" ")} fill="none" stroke="#0f172a" strokeWidth="2" />
+        <polyline
+          points={pontos.join(" ")}
+          fill="none"
+          stroke="#0f172a"
+          strokeWidth="2"
+        />
 
         {/* deslocamento previsto */}
         {previsto && (
@@ -72,7 +97,12 @@ export function CurvaXY({
               strokeWidth="1.5"
               strokeDasharray="4 3"
             />
-            <circle cx={px(previsto.x)} cy={py(previsto.y)} r="6" fill="#f59e0b" />
+            <circle
+              cx={px(previsto.x)}
+              cy={py(previsto.y)}
+              r="6"
+              fill="#f59e0b"
+            />
             <text
               x={px(previsto.x)}
               y={py(previsto.y) - 12}
@@ -85,11 +115,21 @@ export function CurvaXY({
         )}
 
         <circle cx={px(x0)} cy={py(y0)} r="6" fill="#0f172a" />
-        <text x={px(x0)} y={py(y0) - 12} textAnchor="middle" className="fill-slate-900 text-[10px] font-medium">
+        <text
+          x={px(x0)}
+          y={py(y0) - 12}
+          textAnchor="middle"
+          className="fill-slate-900 text-[10px] font-medium"
+        >
           agora
         </text>
 
-        <text x={W - PAD} y={H - 8} textAnchor="end" className="fill-slate-400 text-[10px]">
+        <text
+          x={W - PAD}
+          y={H - 8}
+          textAnchor="end"
+          className="fill-slate-400 text-[10px]"
+        >
           CSR no pool →
         </text>
         <text x={8} y={PAD} className="fill-slate-400 text-[10px]">

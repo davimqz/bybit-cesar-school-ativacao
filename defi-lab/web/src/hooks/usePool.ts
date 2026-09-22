@@ -5,11 +5,16 @@ import { useQuery } from "@tanstack/react-query";
 import { parseAbiItem, type Address } from "viem";
 import { abis, CONTRACTS } from "@/lib/contracts";
 import deployment from "@/lib/deployment.json";
+import { activeChain } from "@/lib/wagmi";
 
 /** Leitura completa de um pool + a posição do aluno nele. */
 export function usePoolData(pool: Address) {
   const { address } = useConnection();
-  const base = { address: pool, abi: abis.pool } as const;
+  const base = {
+    address: pool,
+    abi: abis.pool,
+    chainId: activeChain.id,
+  } as const;
 
   const { data, refetch, isLoading } = useReadContracts({
     contracts: [
@@ -45,12 +50,37 @@ export function useSaldosEAprovacoes(spender: Address) {
   const { address } = useConnection();
   const habilitado = !!address;
 
+  // `chainId` em CADA contrato, não no topo da chamada: o `readContracts` do
+  // wagmi agrupa por `contract.chainId ?? config.state.chainId` e descarta um
+  // chainId de nível superior. No topo ele passa no TypeScript e não faz nada.
+  const token = { abi: abis.token, chainId: activeChain.id } as const;
+
   const { data, refetch } = useReadContracts({
     contracts: [
-      { address: CONTRACTS.csr, abi: abis.token, functionName: "balanceOf", args: [address ?? "0x0"] },
-      { address: CONTRACTS.brlx, abi: abis.token, functionName: "balanceOf", args: [address ?? "0x0"] },
-      { address: CONTRACTS.csr, abi: abis.token, functionName: "allowance", args: [address ?? "0x0", spender] },
-      { address: CONTRACTS.brlx, abi: abis.token, functionName: "allowance", args: [address ?? "0x0", spender] },
+      {
+        ...token,
+        address: CONTRACTS.csr,
+        functionName: "balanceOf",
+        args: [address ?? "0x0"],
+      },
+      {
+        ...token,
+        address: CONTRACTS.brlx,
+        functionName: "balanceOf",
+        args: [address ?? "0x0"],
+      },
+      {
+        ...token,
+        address: CONTRACTS.csr,
+        functionName: "allowance",
+        args: [address ?? "0x0", spender],
+      },
+      {
+        ...token,
+        address: CONTRACTS.brlx,
+        functionName: "allowance",
+        args: [address ?? "0x0", spender],
+      },
     ],
     query: { enabled: habilitado, refetchInterval: 4000 },
   });
@@ -85,7 +115,8 @@ export function useDepositosDoAluno(pool: Address) {
     enabled: !!address && !!publicClient,
     refetchInterval: 8000,
     queryFn: async () => {
-      if (!publicClient || !address) return { total0: 0n, total1: 0n, aportes: 0 };
+      if (!publicClient || !address)
+        return { total0: 0n, total1: 0n, aportes: 0 };
 
       const logs = await publicClient.getLogs({
         address: pool,

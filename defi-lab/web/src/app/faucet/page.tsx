@@ -5,6 +5,7 @@ import { ConnectBar } from "@/components/ConnectBar";
 import { Card, Stat, Botao, NotaDeAula, Aviso } from "@/components/ui";
 import { useTx, StatusTx } from "@/hooks/useTx";
 import { CONTRACTS, TOKENS, abis, fmt } from "@/lib/contracts";
+import { activeChain } from "@/lib/wagmi";
 
 /**
  * Sem gas o aluno não faz nada. Esta página existe para que "não consigo
@@ -17,9 +18,10 @@ export default function FaucetPage() {
   const txCsr = useTx();
   const txBrlx = useTx();
 
-  const { data: saldoEth } = useBalance({ address });
+  const { data: saldoEth } = useBalance({ chainId: activeChain.id, address });
 
   const { data: saldoCsr } = useReadContract({
+    chainId: activeChain.id,
     address: CONTRACTS.csr,
     abi: abis.token,
     functionName: "balanceOf",
@@ -28,6 +30,7 @@ export default function FaucetPage() {
   });
 
   const { data: saldoBrlx } = useReadContract({
+    chainId: activeChain.id,
     address: CONTRACTS.brlx,
     abi: abis.token,
     functionName: "balanceOf",
@@ -36,6 +39,7 @@ export default function FaucetPage() {
   });
 
   const { data: saquesRestantes } = useReadContract({
+    chainId: activeChain.id,
     address: CONTRACTS.gasFaucet,
     abi: abis.gasFaucet,
     functionName: "remainingClaims",
@@ -46,10 +50,13 @@ export default function FaucetPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Faucet da aula</h1>
-        <p className="mt-2 max-w-2xl text-slate-600">
-          Gas para pagar as transações e tokens para operar nos labs. Tudo de rede de
-          teste: não vale nada, e é essa a graça — dá para errar à vontade.
+        <h1 className="text-3xl font-semibold tracking-tight">
+          Faucet da aula
+        </h1>
+        <p className="mt-2 max-w-2xl text-muted-foreground">
+          Gas para pagar as transações e tokens para operar nos labs. Tudo de
+          rede de teste: não vale nada, e é essa a graça — dá para errar à
+          vontade.
         </p>
       </div>
 
@@ -69,14 +76,25 @@ export default function FaucetPage() {
               />
             </Card>
             <Card>
-              <Stat rotulo="CSR" valor={fmt(saldoCsr as bigint | undefined)} dica="O ativo volátil da aula" />
+              <Stat
+                rotulo="CSR"
+                valor={fmt(saldoCsr as bigint | undefined)}
+                dica="O ativo volátil da aula"
+              />
             </Card>
             <Card>
-              <Stat rotulo="BRLX" valor={fmt(saldoBrlx as bigint | undefined)} dica="A 'stablecoin' da aula" />
+              <Stat
+                rotulo="BRLX"
+                valor={fmt(saldoBrlx as bigint | undefined)}
+                dica="A 'stablecoin' da aula"
+              />
             </Card>
           </div>
 
-          <Card titulo="1. Pegue gas" subtitulo="Sem isto, nenhuma das outras ações funciona">
+          <Card
+            titulo="1. Pegue gas"
+            subtitulo="Sem isto, nenhuma das outras ações funciona"
+          >
             <div className="flex flex-wrap items-center gap-4">
               <Botao
                 onClick={() =>
@@ -90,10 +108,12 @@ export default function FaucetPage() {
               >
                 {txGas.ocupada ? "Processando…" : "Receber ETH de teste"}
               </Botao>
-              <span className="text-sm text-slate-500">
+              <span className="text-sm text-muted-foreground">
                 o faucet ainda atende{" "}
                 <strong className="tabular-nums">
-                  {saquesRestantes !== undefined ? String(saquesRestantes) : "—"}
+                  {saquesRestantes !== undefined
+                    ? String(saquesRestantes)
+                    : "—"}
                 </strong>{" "}
                 saques
               </span>
@@ -102,16 +122,21 @@ export default function FaucetPage() {
               <StatusTx tx={txGas} sucesso="Gas na conta." />
             </div>
             <NotaDeAula>
-              Esse ETH sai de um contrato que o professor abasteceu antes da aula. Repare que
-              o faucet é apenas mais um contrato — com regras públicas e um saldo que acaba.
+              Esse ETH sai de um contrato que o professor abasteceu antes da
+              aula. Repare que o faucet é apenas mais um contrato — com regras
+              públicas e um saldo que acaba.
             </NotaDeAula>
           </Card>
 
-          <Card titulo="2. Pegue os tokens" subtitulo="Cada saque libera 1.000 unidades">
+          <Card
+            titulo="2. Pegue os tokens"
+            subtitulo="Cada saque libera 1.000 unidades"
+          >
             {semGas && (
               <div className="mb-4">
                 <Aviso tom="alerta">
-                  Pegue o gas primeiro — estas duas ações também são transações e precisam ser pagas.
+                  Pegue o gas primeiro — estas duas ações também são transações
+                  e precisam ser pagas.
                 </Aviso>
               </div>
             )}
@@ -148,9 +173,10 @@ export default function FaucetPage() {
               <StatusTx tx={txBrlx} sucesso="BRLX recebido." />
             </div>
             <NotaDeAula>
-              Qualquer pessoa pode chamar <code>claim()</code> e criar tokens do nada. Num token
-              de verdade isso seria uma falha grave de design — aqui é proposital. Pergunte-se
-              sempre: quem pode emitir? Em que ritmo? Com qual limite?
+              Qualquer pessoa pode chamar <code>claim()</code> e criar tokens do
+              nada. Num token de verdade isso seria uma falha grave de design —
+              aqui é proposital. Pergunte-se sempre: quem pode emitir? Em que
+              ritmo? Com qual limite?
             </NotaDeAula>
           </Card>
         </>

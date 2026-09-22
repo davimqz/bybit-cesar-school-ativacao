@@ -2,7 +2,15 @@
 
 import { Card, Botao, Aviso, NotaDeAula } from "@/components/ui";
 import { useTx, StatusTx } from "@/hooks/useTx";
-import { CONTRACTS, LADO, abis, fmt, fmtPreco, linkExplorer, type Ordem } from "@/lib/contracts";
+import {
+  CONTRACTS,
+  LADO,
+  abis,
+  fmt,
+  fmtPreco,
+  linkExplorer,
+  type Ordem,
+} from "@/lib/contracts";
 
 /**
  * As ordens vivas do aluno, com o botão de cancelar.
@@ -23,7 +31,10 @@ export function MinhasOrdens({
   const link = linkExplorer("address", CONTRACTS.orderBook);
 
   return (
-    <Card titulo="Suas ordens no livro" subtitulo="O que você ainda tem parado no mercado">
+    <Card
+      titulo="Suas ordens no livro"
+      subtitulo="O que você ainda tem parado no mercado"
+    >
       {!conectado ? (
         <Aviso tom="info">Conecte a carteira para ver suas ordens.</Aviso>
       ) : minhas.length === 0 ? (
@@ -31,19 +42,28 @@ export function MinhasOrdens({
           Você não tem ordens no livro. Coloque uma abaixo e ela aparece aqui.
         </Aviso>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-border">
           {minhas.map((o) => {
             const vendendo = Number(o.lado) === LADO.venda;
             return (
-              <li key={String(o.id)} className="flex items-center justify-between gap-4 py-3">
+              <li
+                key={String(o.id)}
+                className="flex items-center justify-between gap-4 py-3"
+              >
                 <div className="text-sm">
                   <span
-                    className={`font-semibold ${vendendo ? "text-rose-600" : "text-emerald-600"}`}
+                    className={`font-semibold ${vendendo ? "text-down" : "text-up"}`}
                   >
-                    {vendendo ? "Vendendo" : "Comprando"} {fmt(o.quantidade)} CSR
+                    {vendendo ? "Vendendo" : "Comprando"} {fmt(o.quantidade)}{" "}
+                    CSR
                   </span>
-                  <span className="text-slate-500"> a {fmtPreco(o.preco)} BRLX</span>
-                  <span className="ml-2 text-xs text-slate-400">#{String(o.id)}</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    a {fmtPreco(o.preco)} BRLX
+                  </span>
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    #{String(o.id)}
+                  </span>
                 </div>
                 <Botao
                   variante="secundario"
@@ -76,14 +96,19 @@ export function MinhasOrdens({
           <>
             {" "}
             (
-            <a href={link} target="_blank" rel="noreferrer" className="underline">
+            <a
+              href={link}
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
               veja no explorador
             </a>
             )
           </>
         )}
-        , não na sua carteira. Cancelar devolve na hora — e é o próprio código que garante
-        isso, não uma promessa de atendimento.
+        , não na sua carteira. Cancelar devolve na hora — e é o próprio código
+        que garante isso, não uma promessa de atendimento.
       </NotaDeAula>
     </Card>
   );

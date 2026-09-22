@@ -1,10 +1,31 @@
 import { type ReactNode } from "react";
+import { Info, TriangleAlert, OctagonAlert } from "lucide-react";
+import {
+  Card as ShadCard,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
 
 /**
  * Primitivos visuais do lab.
  *
- * Tema claro e números grandes de propósito: isto é projetado numa sala
- * com luz acesa. Fundo escuro em projetor de sala de aula some.
+ * Tudo aqui é lido em dois lugares ao mesmo tempo: um projetor de sala
+ * iluminada e um celular no 4G. As duas consequências que explicam quase todas
+ * as escolhas deste arquivo:
+ *
+ *   1. Nada de texto cinza claro. O que era `slate-400` (2,6:1) virou
+ *      `muted-foreground` (6,36:1) — projetor lava cinza claro até sumir.
+ *   2. Toda figura é mono e tabular. Estes números atualizam a cada 2 s, e
+ *      dígito que muda de largura a cada refresh faz a coluna tremer.
+ *
+ * Não há tooltip em lugar nenhum de propósito: metade da turma está no celular,
+ * onde hover não existe. Informação que importa fica visível.
  */
 
 export function Card({
@@ -19,22 +40,48 @@ export function Card({
   destaque?: boolean;
 }) {
   return (
-    <section
-      className={`rounded-2xl border bg-white p-6 shadow-sm ${
-        destaque ? "border-amber-400 ring-2 ring-amber-100" : "border-slate-200"
-      }`}
+    <ShadCard
+      className={cn(
+        // Este style desenha o cartão com `ring`, não `border`, e mede todo o
+        // respiro por `--card-spacing`. Definir a variável em vez de cravar
+        // padding mantém header e conteúdo alinhados pelo mesmo eixo.
+        "[--card-spacing:--spacing(6)] gap-5 text-base",
+        // O âmbar da marca vira moldura num lugar só: "olhe aqui agora"
+        // (reserva secando, disputa aberta, campanha que falhou). Se aparecer
+        // em dois cartões ao mesmo tempo, não marca mais nada.
+        destaque && "ring-signal ring-2",
+      )}
     >
       {titulo && (
-        <header className="mb-4">
-          <h2 className="text-lg font-semibold text-slate-900">{titulo}</h2>
-          {subtitulo && <p className="mt-1 text-sm text-slate-500">{subtitulo}</p>}
-        </header>
+        <CardHeader className="border-border border-b pb-4">
+          <CardTitle className="text-lg leading-snug font-semibold">
+            {titulo}
+          </CardTitle>
+          {subtitulo && (
+            <CardDescription className="max-w-prose">
+              {subtitulo}
+            </CardDescription>
+          )}
+        </CardHeader>
       )}
-      {children}
-    </section>
+      <CardContent>{children}</CardContent>
+    </ShadCard>
   );
 }
 
+const TONS = {
+  neutro: "text-foreground",
+  bom: "text-up",
+  ruim: "text-down",
+  alerta: "text-warn",
+} as const;
+
+/**
+ * Um número e o que ele significa.
+ *
+ * O rótulo é frase normal, não caixa-alta espaçada: caixa-alta é mais lenta de
+ * ler e aqui ela competiria com a figura, que é quem deve ganhar.
+ */
 export function Stat({
   rotulo,
   valor,
@@ -48,21 +95,27 @@ export function Stat({
   tom?: "neutro" | "bom" | "ruim" | "alerta";
   dica?: string;
 }) {
-  const cores = {
-    neutro: "text-slate-900",
-    bom: "text-emerald-600",
-    ruim: "text-rose-600",
-    alerta: "text-amber-600",
-  }[tom];
-
   return (
-    <div>
-      <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{rotulo}</dt>
-      <dd className={`mt-1 text-2xl font-semibold tabular-nums ${cores}`}>
+    <div className="min-w-0">
+      <dt className="text-muted-foreground text-sm font-medium">{rotulo}</dt>
+      <dd
+        className={cn(
+          "mt-1 font-mono text-[1.75rem] leading-none font-semibold tracking-tight tabular-nums",
+          TONS[tom],
+        )}
+      >
         {valor}
-        {sufixo && <span className="ml-1 text-base font-normal text-slate-400">{sufixo}</span>}
+        {sufixo && (
+          <span className="text-muted-foreground ml-1.5 font-sans text-base font-medium">
+            {sufixo}
+          </span>
+        )}
       </dd>
-      {dica && <p className="mt-1 text-xs text-slate-400">{dica}</p>}
+      {dica && (
+        <p className="text-muted-foreground mt-1.5 max-w-prose text-sm">
+          {dica}
+        </p>
+      )}
     </div>
   );
 }
@@ -80,22 +133,22 @@ export function Botao({
   variante?: "primario" | "secundario" | "perigo";
   type?: "button" | "submit";
 }) {
-  const estilos = {
-    primario: "bg-slate-900 text-white hover:bg-slate-700 disabled:bg-slate-300",
-    secundario:
-      "bg-white text-slate-900 border border-slate-300 hover:bg-slate-50 disabled:text-slate-400",
-    perigo: "bg-rose-600 text-white hover:bg-rose-500 disabled:bg-rose-200",
-  }[variante];
+  const variant = {
+    primario: "default",
+    secundario: "outline",
+    perigo: "destructive",
+  }[variante] as "default" | "outline" | "destructive";
 
   return (
-    <button
+    <Button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-lg px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed ${estilos}`}
+      variant={variant}
+      size="lg"
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -116,51 +169,87 @@ export function CampoValor({
 }) {
   return (
     <label className="block">
-      <div className="flex items-baseline justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{rotulo}</span>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <span className="text-sm font-medium">{rotulo}</span>
         {disponivel && (
-          <span className="text-xs text-slate-400">
-            saldo: {disponivel}
+          <span className="text-muted-foreground text-sm">
+            saldo <span className="font-mono tabular-nums">{disponivel}</span>
             {onMax && (
               <button
                 type="button"
                 onClick={onMax}
-                className="ml-2 font-medium text-slate-600 underline hover:text-slate-900"
+                className="text-foreground focus-visible:ring-ring ml-2 rounded font-medium underline underline-offset-2 focus-visible:ring-2 focus-visible:outline-none"
               >
-                máx
+                usar tudo
               </button>
             )}
           </span>
         )}
       </div>
-      <div className="mt-1 flex items-center rounded-lg border border-slate-300 bg-white focus-within:border-slate-900">
-        <input
+
+      <div className="mt-1.5 flex items-center gap-2">
+        <Input
           value={valor}
           onChange={(e) => onChange(e.target.value)}
           inputMode="decimal"
           placeholder="0,0"
-          className="w-full bg-transparent px-3 py-2.5 text-lg tabular-nums outline-none"
+          className="h-12 font-mono text-lg tabular-nums md:text-lg"
         />
-        {sufixo && <span className="px-3 text-sm font-medium text-slate-400">{sufixo}</span>}
+        {sufixo && (
+          <span className="text-muted-foreground w-16 shrink-0 text-sm font-semibold">
+            {sufixo}
+          </span>
+        )}
       </div>
     </label>
   );
 }
 
-export function Aviso({ tom = "info", children }: { tom?: "info" | "alerta" | "erro"; children: ReactNode }) {
-  const cores = {
-    info: "bg-slate-50 text-slate-600 border-slate-200",
-    alerta: "bg-amber-50 text-amber-800 border-amber-200",
-    erro: "bg-rose-50 text-rose-800 border-rose-200",
-  }[tom];
+const AVISOS = {
+  info: {
+    Icone: Info,
+    classe:
+      "border-border bg-muted text-foreground [&>svg]:text-muted-foreground",
+  },
+  alerta: {
+    Icone: TriangleAlert,
+    classe: "border-warn-border bg-warn-surface text-warn [&>svg]:text-warn",
+  },
+  erro: {
+    Icone: OctagonAlert,
+    classe: "border-down-border bg-down-surface text-down [&>svg]:text-down",
+  },
+} as const;
 
-  return <div className={`rounded-lg border px-4 py-3 text-sm ${cores}`}>{children}</div>;
+export function Aviso({
+  tom = "info",
+  children,
+}: {
+  tom?: "info" | "alerta" | "erro";
+  children: ReactNode;
+}) {
+  const { Icone, classe } = AVISOS[tom];
+
+  return (
+    <Alert className={cn("px-4 py-3", classe)}>
+      <Icone />
+      <AlertDescription className="max-w-prose text-sm leading-relaxed text-current">
+        {children}
+      </AlertDescription>
+    </Alert>
+  );
 }
 
-/** Explicação curta do conceito, ao lado do número que o demonstra. */
+/**
+ * A voz do professor, ao lado do número que ela explica.
+ *
+ * O fio âmbar à esquerda é o que separa "o lab está te dizendo um dado" de
+ * "o lab está te ensinando uma coisa". É o mesmo âmbar da marca, usado como
+ * estrutura — o único jeito de usá-lo, já que como texto ele não tem contraste.
+ */
 export function NotaDeAula({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-3 border-l-2 border-slate-200 pl-3 text-sm leading-relaxed text-slate-500">
+    <p className="border-signal text-muted-foreground mt-4 max-w-prose border-l-2 py-0.5 pl-4 text-sm leading-relaxed">
       {children}
     </p>
   );

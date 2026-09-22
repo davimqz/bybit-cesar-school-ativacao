@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { useConnection } from "wagmi";
 import { maxUint256 } from "viem";
-import { Card, Stat, Botao, CampoValor, Aviso, NotaDeAula } from "@/components/ui";
+import {
+  Card,
+  Stat,
+  Botao,
+  CampoValor,
+  Aviso,
+  NotaDeAula,
+} from "@/components/ui";
 import { useTx, StatusTx } from "@/hooks/useTx";
 import { useSaldosEAprovacoes } from "@/hooks/usePool";
 import { paraWei } from "@/components/pool/SwapCard";
@@ -31,16 +38,18 @@ export function OrdemLimitada({
   const [preco, setPreco] = useState("");
   const [quantia, setQuantia] = useState("50");
 
-  const { saldoCsr, saldoBrlx, allowanceCsr, allowanceBrlx, refetch } = useSaldosEAprovacoes(
-    CONTRACTS.orderBook,
-  );
+  const { saldoCsr, saldoBrlx, allowanceCsr, allowanceBrlx, refetch } =
+    useSaldosEAprovacoes(CONTRACTS.orderBook);
 
   const txAprovar = useTx();
   const txColocar = useTx();
 
   const precoWei = paraWei(preco);
   const qtd = paraWei(quantia);
-  const custoQuote = precoWei !== undefined && qtd !== undefined ? (qtd * precoWei) / 10n ** 18n : undefined;
+  const custoQuote =
+    precoWei !== undefined && qtd !== undefined
+      ? (qtd * precoWei) / 10n ** 18n
+      : undefined;
 
   // Vendedor deposita CSR; comprador deposita BRLX. Sempre no ato.
   const tokenEmCustodia = vendendo ? TOKENS.csr : TOKENS.brlx;
@@ -48,8 +57,10 @@ export function OrdemLimitada({
   const allowance = vendendo ? allowanceCsr : allowanceBrlx;
   const saldo = vendendo ? saldoCsr : saldoBrlx;
 
-  const precisaAprovar = valorEmCustodia !== undefined && (allowance ?? 0n) < valorEmCustodia;
-  const semSaldo = valorEmCustodia !== undefined && (saldo ?? 0n) < valorEmCustodia;
+  const precisaAprovar =
+    valorEmCustodia !== undefined && (allowance ?? 0n) < valorEmCustodia;
+  const semSaldo =
+    valorEmCustodia !== undefined && (saldo ?? 0n) < valorEmCustodia;
 
   // Uma ordem que já cruza o spread executaria na hora numa bolsa real. Este
   // livro não casa na entrada, então ela ficaria parada oferecendo dinheiro
@@ -60,7 +71,10 @@ export function OrdemLimitada({
       (!vendendo && ask !== undefined && ask > 0n && precoWei >= ask));
 
   return (
-    <Card titulo="Colocar uma ordem" subtitulo="Virar o outro lado do balcão: você define o preço">
+    <Card
+      titulo="Colocar uma ordem"
+      subtitulo="Virar o outro lado do balcão: você define o preço"
+    >
       <div className="space-y-4">
         <div className="flex gap-2">
           {[
@@ -72,8 +86,8 @@ export function OrdemLimitada({
               onClick={() => setVendendo(op.valor)}
               className={`rounded-lg border px-3 py-1.5 text-sm transition ${
                 vendendo === op.valor
-                  ? "border-slate-900 bg-slate-900 text-white"
-                  : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
+                  ? "border-foreground bg-primary text-primary-foreground"
+                  : "border-input bg-card text-muted-foreground hover:bg-muted"
               }`}
             >
               {op.rotulo}
@@ -107,7 +121,7 @@ export function OrdemLimitada({
         </div>
 
         {valorEmCustodia !== undefined && valorEmCustodia > 0n && (
-          <dl className="grid grid-cols-1 gap-4 rounded-xl bg-slate-50 p-4">
+          <dl className="grid grid-cols-1 gap-4 rounded-xl bg-muted p-4">
             <Stat
               rotulo="Vai ficar em custódia agora"
               valor={fmt(valorEmCustodia)}
@@ -119,36 +133,52 @@ export function OrdemLimitada({
 
         {cruzaOSpread && (
           <Aviso tom="alerta">
-            Esse preço cruza o spread: você está {vendendo ? "vendendo mais barato" : "pagando mais caro"}{" "}
-            que o melhor preço que já está no livro. Numa bolsa de verdade a ordem executaria
-            na hora; aqui ela fica parada, esperando alguém pegar o presente.
+            Esse preço cruza o spread: você está{" "}
+            {vendendo ? "vendendo mais barato" : "pagando mais caro"} que o
+            melhor preço que já está no livro. Numa bolsa de verdade a ordem
+            executaria na hora; aqui ela fica parada, esperando alguém pegar o
+            presente.
           </Aviso>
         )}
 
         {semSaldo && (
           <Aviso tom="alerta">
-            Saldo de {tokenEmCustodia.symbol} insuficiente. Uma ordem sem lastro não existe
-            neste contrato: o depósito acontece na mesma transação.
+            Saldo de {tokenEmCustodia.symbol} insuficiente. Uma ordem sem lastro
+            não existe neste contrato: o depósito acontece na mesma transação.
           </Aviso>
         )}
 
+        {/*
+          Duas transacoes, duas etapas visiveis. O botao de aprovar NAO some
+          depois de usado: quando ele sumia, o aluno assinava o `approve`, via o
+          aviso verde e ia procurar a propria ordem no livro — que nao existia.
+        */}
+        <p className="text-sm text-muted-foreground">
+          Colocar uma ordem são <strong>duas transações</strong>: a aprovação
+          apenas escreve uma permissão, e é o passo 2 que deposita a custódia e
+          cria a ordem.
+        </p>
+
         <div className="flex flex-wrap gap-3">
-          {precisaAprovar && (
-            <Botao
-              disabled={!isConnected || txAprovar.ocupada}
-              onClick={async () => {
-                await txAprovar.enviar({
-                  address: tokenEmCustodia.address,
-                  abi: abis.token,
-                  functionName: "approve",
-                  args: [CONTRACTS.orderBook, maxUint256],
-                });
-                refetch();
-              }}
-            >
-              {txAprovar.ocupada ? "Processando…" : `Aprovar ${tokenEmCustodia.symbol}`}
-            </Botao>
-          )}
+          <Botao
+            variante={precisaAprovar ? "primario" : "secundario"}
+            disabled={!isConnected || !precisaAprovar || txAprovar.ocupada}
+            onClick={async () => {
+              await txAprovar.enviar({
+                address: tokenEmCustodia.address,
+                abi: abis.token,
+                functionName: "approve",
+                args: [CONTRACTS.orderBook, maxUint256],
+              });
+              refetch();
+            }}
+          >
+            {txAprovar.ocupada
+              ? "Processando…"
+              : precisaAprovar
+                ? `Passo 1 de 2 · Aprovar ${tokenEmCustodia.symbol}`
+                : `Passo 1 de 2 · ${tokenEmCustodia.symbol} aprovado ✓`}
+          </Botao>
           <Botao
             disabled={
               !isConnected ||
@@ -170,17 +200,28 @@ export function OrdemLimitada({
               onFeito();
             }}
           >
-            {txColocar.ocupada ? "Enviando…" : "Colocar no livro"}
+            {txColocar.ocupada
+              ? "Enviando…"
+              : "Passo 2 de 2 · Colocar no livro"}
           </Botao>
         </div>
 
-        <StatusTx tx={txAprovar} sucesso="Aprovado." />
-        <StatusTx tx={txColocar} sucesso="Sua ordem está no livro. Ela aparece na lista ao lado." />
+        {!txColocar.hash && (
+          <StatusTx
+            tx={txAprovar}
+            sucesso="Aprovado — e nenhum token saiu da sua carteira ainda, nem existe ordem. Falta o passo 2: clique em Colocar no livro."
+          />
+        )}
+        <StatusTx
+          tx={txColocar}
+          sucesso="Sua ordem está no livro. Ela aparece na lista ao lado."
+        />
 
         <NotaDeAula>
-          Você não paga slippage nenhum: o preço é seu. Em troca, não ganha nada até alguém
-          aparecer — e se o mercado andar, a sua ordem vira a única barata da tela e é a
-          primeira a ser comida. É esse o risco de quem faz mercado.
+          Você não paga slippage nenhum: o preço é seu. Em troca, não ganha nada
+          até alguém aparecer — e se o mercado andar, a sua ordem vira a única
+          barata da tela e é a primeira a ser comida. É esse o risco de quem faz
+          mercado.
         </NotaDeAula>
       </div>
     </Card>

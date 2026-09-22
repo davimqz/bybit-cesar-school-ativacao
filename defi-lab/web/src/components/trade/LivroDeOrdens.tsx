@@ -30,15 +30,23 @@ export function LivroDeOrdens({
 }) {
   const accVendas = acumulado(vendas);
   const accCompras = acumulado(compras);
-  const maxAcc = [...accVendas, ...accCompras].reduce((a, b) => (b > a ? b : a), 1n);
+  const maxAcc = [...accVendas, ...accCompras].reduce(
+    (a, b) => (b > a ? b : a),
+    1n,
+  );
 
   // Vendas de cima para baixo: a mais cara primeiro, a melhor colada no spread.
-  const vendasDeCima = vendas.map((o, i) => ({ o, acc: accVendas[i] })).reverse();
+  const vendasDeCima = vendas
+    .map((o, i) => ({ o, acc: accVendas[i] }))
+    .reverse();
 
   return (
-    <Card titulo="Livro de ordens" subtitulo="CSR / BRLX — clique numa linha para negociar contra ela">
-      <div className="overflow-hidden rounded-xl border border-slate-200">
-        <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+    <Card
+      titulo="Livro de ordens"
+      subtitulo="CSR / BRLX — clique numa linha para negociar contra ela"
+    >
+      <div className="overflow-hidden rounded-xl border border-border">
+        <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 border-b border-border bg-muted px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           <span>Preço (BRLX)</span>
           <span className="text-right">Quantidade</span>
           <span className="text-right">Acumulado</span>
@@ -46,7 +54,9 @@ export function LivroDeOrdens({
         </div>
 
         {vendasDeCima.length === 0 && (
-          <p className="px-4 py-3 text-sm text-slate-400">Ninguém vendendo.</p>
+          <p className="px-4 py-3 text-sm text-muted-foreground">
+            Ninguém vendendo.
+          </p>
         )}
         {vendasDeCima.map(({ o, acc }) => (
           <Linha
@@ -61,24 +71,31 @@ export function LivroDeOrdens({
           />
         ))}
 
-        <div className="flex items-baseline justify-between border-y border-slate-200 bg-slate-100 px-4 py-2.5">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+        <div className="flex items-baseline justify-between border-y border-border bg-secondary px-4 py-2.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Spread
           </span>
-          <span className="text-sm tabular-nums text-slate-700">
+          <span className="text-sm tabular-nums text-foreground">
             {spreadBps !== undefined && spreadBps > 0n ? (
               <>
                 <strong>{fmtBps(spreadBps)}</strong>
-                {meio && <span className="text-slate-400"> · meio {fmtPreco(meio)}</span>}
+                {meio && (
+                  <span className="text-muted-foreground">
+                    {" "}
+                    · meio {fmtPreco(meio)}
+                  </span>
+                )}
               </>
             ) : (
-              <span className="text-slate-400">falta um dos lados</span>
+              <span className="text-muted-foreground">falta um dos lados</span>
             )}
           </span>
         </div>
 
         {compras.length === 0 && (
-          <p className="px-4 py-3 text-sm text-slate-400">Ninguém comprando.</p>
+          <p className="px-4 py-3 text-sm text-muted-foreground">
+            Ninguém comprando.
+          </p>
         )}
         {compras.map((o, i) => (
           <Linha
@@ -95,9 +112,10 @@ export function LivroDeOrdens({
       </div>
 
       <NotaDeAula>
-        Cada linha é uma pessoa que já depositou o que prometeu — o contrato está
-        segurando o dinheiro de quem compra e a mercadoria de quem vende. Por isso
-        nenhuma execução aqui pode falhar por falta de saldo do outro lado.
+        Cada linha é uma pessoa que já depositou o que prometeu — o contrato
+        está segurando o dinheiro de quem compra e a mercadoria de quem vende.
+        Por isso nenhuma execução aqui pode falhar por falta de saldo do outro
+        lado.
       </NotaDeAula>
     </Card>
   );
@@ -121,18 +139,19 @@ function Linha({
   meuEndereco?: string;
 }) {
   const largura = Number((acumulado * 100n) / maxAcc);
-  const minha = meuEndereco && ordem.dono.toLowerCase() === meuEndereco.toLowerCase();
+  const minha =
+    meuEndereco && ordem.dono.toLowerCase() === meuEndereco.toLowerCase();
 
   const cores =
     tom === "venda"
-      ? { texto: "text-rose-600", barra: "bg-rose-50" }
-      : { texto: "text-emerald-600", barra: "bg-emerald-50" };
+      ? { texto: "text-down", barra: "bg-down-surface" }
+      : { texto: "text-up", barra: "bg-up-surface" };
 
   return (
     <button
       onClick={() => onSelecionar(ordem)}
-      className={`relative grid w-full grid-cols-[1fr_1fr_1fr_auto] gap-2 px-4 py-2 text-left text-sm tabular-nums transition hover:bg-slate-50 ${
-        selecionada ? "ring-2 ring-inset ring-slate-900" : ""
+      className={`relative grid w-full grid-cols-[1fr_1fr_1fr_auto] gap-2 px-4 py-2 text-left text-sm tabular-nums transition hover:bg-muted ${
+        selecionada ? "ring-2 ring-inset ring-ring" : ""
       }`}
     >
       <span
@@ -140,11 +159,19 @@ function Linha({
         className={`absolute inset-y-0 right-0 ${cores.barra}`}
         style={{ width: `${largura}%` }}
       />
-      <span className={`relative font-semibold ${cores.texto}`}>{fmtPreco(ordem.preco)}</span>
+      <span className={`relative font-semibold ${cores.texto}`}>
+        {fmtPreco(ordem.preco)}
+      </span>
       <span className="relative text-right">{fmt(ordem.quantidade)}</span>
-      <span className="relative text-right text-slate-400">{fmt(acumulado)}</span>
-      <span className="relative w-20 text-right text-xs text-slate-400">
-        {minha ? <strong className="text-slate-700">você</strong> : encurtar(ordem.dono)}
+      <span className="relative text-right text-muted-foreground">
+        {fmt(acumulado)}
+      </span>
+      <span className="relative w-20 text-right text-xs text-muted-foreground">
+        {minha ? (
+          <strong className="text-foreground">você</strong>
+        ) : (
+          encurtar(ordem.dono)
+        )}
       </span>
     </button>
   );

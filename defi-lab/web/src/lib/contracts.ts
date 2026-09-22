@@ -25,6 +25,9 @@ export const CONTRACTS = {
 export const PROFESSOR = deployment.professor as Address;
 export const CHAIN_ID = deployment.chainId;
 
+/** Bloco do deploy: o telão não precisa varrer a chain inteira atrás do lab. */
+export const DEPLOY_BLOCK = BigInt(deployment.deployBlock);
+
 export const abis = {
   token: classroomTokenAbi,
   pool: miniAmmAbi,
@@ -68,12 +71,44 @@ export function tokenPorEndereco(address?: Address) {
 
 // --- Formatação -------------------------------------------------------------
 
-/** Número legível num telão: sem notação científica, sem 18 casas. */
-export function fmt(valor: bigint | undefined, casas = 2, decimais = 18): string {
+/**
+ * Número legível num telão: sem notação científica, sem 18 casas.
+ *
+ * Quantidade de token sai **inteira** por padrão. Numa aula ao vivo a vírgula
+ * decimal do pt-BR é uma armadilha: quem está acostumado a ver "60,000" em
+ * inglês lê "60,0000 CSR" como sessenta mil e acha que colheu mil vezes mais do
+ * que colheu. Casas decimais só aparecem onde alguém as pede de propósito —
+ * preço e saldo de ETH, em que o inteiro seria a mentira.
+ *
+ * Trunca em vez de arredondar: mostrar "saldo 1.126" com 1.125,99 na carteira
+ * faz o aluno digitar 1126 na retirada e tomar revert. Para baixo nunca mente.
+ */
+export function fmt(
+  valor: bigint | undefined,
+  casas = 0,
+  decimais = 18,
+): string {
   if (valor === undefined) return "—";
-  const n = Number(formatUnits(valor, decimais));
-  if (n !== 0 && Math.abs(n) < 0.01) return "< 0,01";
-  return n.toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
+
+  // O corte é feito no bigint, antes de virar `number`. Em float,
+  // 1.125,99999999999999994 já chega arredondado para 1126 — o campo diria
+  // "saldo 1.126", o aluno digitaria 1126 e o botão travaria sem explicar.
+  const sobra = 10n ** BigInt(Math.max(decimais - casas, 0));
+  const cortado = (valor / sobra) * sobra;
+
+  // Cortar um valor real até "0" seria pior que arredondar: o aluno leria
+  // "não rendeu nada" justamente no minuto em que o rendimento começa.
+  if (valor !== 0n && cortado === 0n) {
+    const minimo = (1 / 10 ** casas).toLocaleString("pt-BR", {
+      maximumFractionDigits: casas,
+    });
+    return `< ${minimo}`;
+  }
+
+  return Number(formatUnits(cortado, decimais)).toLocaleString("pt-BR", {
+    minimumFractionDigits: casas,
+    maximumFractionDigits: casas,
+  });
 }
 
 /** Basis points -> percentual. 1687 bps vira "16,87%". */
@@ -93,7 +128,10 @@ export function encurtar(address?: string): string {
 export const EXPLORER_BASE =
   CHAIN_ID === 11155111 ? "https://sepolia.etherscan.io" : undefined;
 
-export function linkExplorer(tipo: "address" | "tx", valor: string): string | undefined {
+export function linkExplorer(
+  tipo: "address" | "tx",
+  valor: string,
+): string | undefined {
   if (!EXPLORER_BASE) return undefined;
   return `${EXPLORER_BASE}/${tipo}/${valor}`;
 }
@@ -138,7 +176,10 @@ export function fmtPreco(preco: bigint | undefined): string {
  * quem reinveste, e por isso mora aqui no front e nao na blockchain — nenhum
  * contrato pode prometer que voce vai clicar em "reinvestir" toda semana.
  */
-export function aprParaApy(aprBps: bigint | undefined, periodos = 52): number | undefined {
+export function aprParaApy(
+  aprBps: bigint | undefined,
+  periodos = 52,
+): number | undefined {
   if (aprBps === undefined) return undefined;
   const apr = Number(aprBps) / 10_000;
   return (1 + apr / periodos) ** periodos - 1;
@@ -148,8 +189,10 @@ export function aprParaApy(aprBps: bigint | undefined, periodos = 52): number | 
 export function fmtPct(fracao: number | undefined, casas = 2): string {
   if (fracao === undefined || !Number.isFinite(fracao)) return "—";
   const pct = fracao * 100;
-  if (pct >= 1e9) return `${(pct / 1e9).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} bi%`;
-  if (pct >= 1e6) return `${(pct / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mi%`;
+  if (pct >= 1e9)
+    return `${(pct / 1e9).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} bi%`;
+  if (pct >= 1e6)
+    return `${(pct / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mi%`;
   return `${pct.toLocaleString("pt-BR", { maximumFractionDigits: casas })}%`;
 }
 
@@ -192,17 +235,23 @@ export type Acordo = {
 /** Rótulo, cor e explicação de cada estado — a tela inteira depende disto. */
 export const ESTADOS: Record<
   number,
-  { rotulo: string; tom: "neutro" | "bom" | "ruim" | "alerta"; explicacao: string }
+  {
+    rotulo: string;
+    tom: "neutro" | "bom" | "ruim" | "alerta";
+    explicacao: string;
+  }
 > = {
   [ESTADO.financiado]: {
     rotulo: "Financiado",
     tom: "alerta",
-    explicacao: "O dinheiro está travado no contrato. O vendedor ainda não marcou envio.",
+    explicacao:
+      "O dinheiro está travado no contrato. O vendedor ainda não marcou envio.",
   },
   [ESTADO.enviado]: {
     rotulo: "Enviado",
     tom: "neutro",
-    explicacao: "O vendedor declarou o envio. O comprador tem uma janela para reclamar.",
+    explicacao:
+      "O vendedor declarou o envio. O comprador tem uma janela para reclamar.",
   },
   [ESTADO.concluido]: {
     rotulo: "Concluído",
@@ -255,17 +304,23 @@ export type Campanha = {
 
 export const SITUACOES: Record<
   number,
-  { rotulo: string; tom: "neutro" | "bom" | "ruim" | "alerta"; explicacao: string }
+  {
+    rotulo: string;
+    tom: "neutro" | "bom" | "ruim" | "alerta";
+    explicacao: string;
+  }
 > = {
   [SITUACAO.arrecadando]: {
     rotulo: "Arrecadando",
     tom: "neutro",
-    explicacao: "Ainda dentro do prazo e abaixo da meta. O criador não consegue sacar.",
+    explicacao:
+      "Ainda dentro do prazo e abaixo da meta. O criador não consegue sacar.",
   },
   [SITUACAO.metaBatida]: {
     rotulo: "Meta batida",
     tom: "bom",
-    explicacao: "O criador já pode sacar tudo. Quem contribuiu não tem mais reembolso.",
+    explicacao:
+      "O criador já pode sacar tudo. Quem contribuiu não tem mais reembolso.",
   },
   [SITUACAO.sacada]: {
     rotulo: "Sacada",
@@ -275,7 +330,8 @@ export const SITUACOES: Record<
   [SITUACAO.falhou]: {
     rotulo: "Falhou",
     tom: "ruim",
-    explicacao: "Prazo vencido sem bater a meta. Cada apoiador saca o que colocou.",
+    explicacao:
+      "Prazo vencido sem bater a meta. Cada apoiador saca o que colocou.",
   },
 };
 

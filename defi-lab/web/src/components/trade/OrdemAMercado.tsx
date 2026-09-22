@@ -3,11 +3,26 @@
 import { useState } from "react";
 import { useConnection, useReadContract } from "wagmi";
 import { maxUint256 } from "viem";
-import { Card, Stat, Botao, CampoValor, Aviso, NotaDeAula } from "@/components/ui";
+import {
+  Card,
+  Stat,
+  Botao,
+  CampoValor,
+  Aviso,
+  NotaDeAula,
+} from "@/components/ui";
 import { useTx, StatusTx } from "@/hooks/useTx";
 import { useSaldosEAprovacoes } from "@/hooks/usePool";
 import { paraWei } from "@/components/pool/SwapCard";
-import { CONTRACTS, TOKENS, abis, fmt, fmtBps, fmtPreco } from "@/lib/contracts";
+import {
+  CONTRACTS,
+  TOKENS,
+  abis,
+  fmt,
+  fmtBps,
+  fmtPreco,
+} from "@/lib/contracts";
+import { activeChain } from "@/lib/wagmi";
 
 const TOLERANCIAS = [100, 300, 1000];
 
@@ -24,9 +39,8 @@ export function OrdemAMercado({ onFeito }: { onFeito: () => void }) {
   const [quantia, setQuantia] = useState("150");
   const [toleranciaBps, setToleranciaBps] = useState(300);
 
-  const { saldoCsr, saldoBrlx, allowanceCsr, allowanceBrlx, refetch } = useSaldosEAprovacoes(
-    CONTRACTS.orderBook,
-  );
+  const { saldoCsr, saldoBrlx, allowanceCsr, allowanceBrlx, refetch } =
+    useSaldosEAprovacoes(CONTRACTS.orderBook);
 
   const txAprovar = useTx();
   const txOrdem = useTx();
@@ -34,6 +48,7 @@ export function OrdemAMercado({ onFeito }: { onFeito: () => void }) {
   const valor = paraWei(quantia);
 
   const { data: simulacao } = useReadContract({
+    chainId: activeChain.id,
     address: CONTRACTS.orderBook,
     abi: abis.livro,
     functionName: comprando ? "simularCompra" : "simularVenda",
@@ -44,7 +59,8 @@ export function OrdemAMercado({ onFeito }: { onFeito: () => void }) {
   const s = simulacao as readonly [bigint, bigint, bigint, bigint] | undefined;
   const [total, preenchido, precoMedio, slippageBps] = s ?? [];
 
-  const naoCoube = valor !== undefined && preenchido !== undefined && preenchido < valor;
+  const naoCoube =
+    valor !== undefined && preenchido !== undefined && preenchido < valor;
 
   // Comprando: o teto do que aceito gastar. Vendendo: o piso do que aceito receber.
   const limite =
@@ -59,12 +75,16 @@ export function OrdemAMercado({ onFeito }: { onFeito: () => void }) {
   const allowance = comprando ? allowanceBrlx : allowanceCsr;
   const saldo = comprando ? saldoBrlx : saldoCsr;
 
-  const precisaAprovar = quantiaQueSai !== undefined && (allowance ?? 0n) < quantiaQueSai;
+  const precisaAprovar =
+    quantiaQueSai !== undefined && (allowance ?? 0n) < quantiaQueSai;
   const semSaldo = quantiaQueSai !== undefined && (saldo ?? 0n) < quantiaQueSai;
   const semLiquidez = preenchido === 0n;
 
   return (
-    <Card titulo="Ordem a mercado" subtitulo="Atravessar o livro, nível por nível">
+    <Card
+      titulo="Ordem a mercado"
+      subtitulo="Atravessar o livro, nível por nível"
+    >
       <div className="space-y-4">
         <div className="flex gap-2">
           {[
@@ -76,8 +96,8 @@ export function OrdemAMercado({ onFeito }: { onFeito: () => void }) {
               onClick={() => setComprando(op.valor)}
               className={`rounded-lg border px-3 py-1.5 text-sm transition ${
                 comprando === op.valor
-                  ? "border-slate-900 bg-slate-900 text-white"
-                  : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
+                  ? "border-foreground bg-primary text-primary-foreground"
+                  : "border-input bg-card text-muted-foreground hover:bg-muted"
               }`}
             >
               {op.rotulo}
@@ -95,18 +115,28 @@ export function OrdemAMercado({ onFeito }: { onFeito: () => void }) {
 
         {s && preenchido !== undefined && preenchido > 0n && (
           <>
-            <dl className="grid grid-cols-2 gap-4 rounded-xl bg-slate-50 p-4 sm:grid-cols-4">
+            <dl className="grid grid-cols-2 gap-4 rounded-xl bg-muted p-4 sm:grid-cols-4">
               <Stat
                 rotulo={comprando ? "Custo total" : "Você recebe"}
                 valor={fmt(total)}
                 sufixo="BRLX"
                 tom={comprando ? "ruim" : "bom"}
               />
-              <Stat rotulo="Preço médio" valor={fmtPreco(precoMedio)} sufixo="BRLX" />
+              <Stat
+                rotulo="Preço médio"
+                valor={fmtPreco(precoMedio)}
+                sufixo="BRLX"
+              />
               <Stat
                 rotulo="Slippage"
                 valor={fmtBps(slippageBps)}
-                tom={(slippageBps ?? 0n) > 300n ? "ruim" : (slippageBps ?? 0n) > 100n ? "alerta" : "neutro"}
+                tom={
+                  (slippageBps ?? 0n) > 300n
+                    ? "ruim"
+                    : (slippageBps ?? 0n) > 100n
+                      ? "alerta"
+                      : "neutro"
+                }
                 dica="contra o topo do livro"
               />
               <Stat rotulo="Preenchido" valor={fmt(preenchido)} sufixo="CSR" />
@@ -114,16 +144,19 @@ export function OrdemAMercado({ onFeito }: { onFeito: () => void }) {
 
             {naoCoube && (
               <Aviso tom="alerta">
-                O livro não tem profundidade para a ordem inteira: só {fmt(preenchido)} CSR
-                seriam executados. O resto não vira nada — ordem a mercado não descansa no
-                livro, ela só consome o que existe.
+                O livro não tem profundidade para a ordem inteira: só{" "}
+                {fmt(preenchido)} CSR seriam executados. O resto não vira nada —
+                ordem a mercado não descansa no livro, ela só consome o que
+                existe.
               </Aviso>
             )}
 
             <div>
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Tolerância — {comprando ? "gasto máximo" : "recebimento mínimo"}{" "}
-                <strong className="tabular-nums text-slate-700">{fmt(limite)} BRLX</strong>
+                <strong className="tabular-nums text-foreground">
+                  {fmt(limite)} BRLX
+                </strong>
               </span>
               <div className="mt-2 flex gap-2">
                 {TOLERANCIAS.map((bps) => (
@@ -132,8 +165,8 @@ export function OrdemAMercado({ onFeito }: { onFeito: () => void }) {
                     onClick={() => setToleranciaBps(bps)}
                     className={`rounded-lg border px-3 py-1 text-sm transition ${
                       toleranciaBps === bps
-                        ? "border-slate-900 bg-slate-900 text-white"
-                        : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
+                        ? "border-foreground bg-primary text-primary-foreground"
+                        : "border-input bg-card text-muted-foreground hover:bg-muted"
                     }`}
                   >
                     {bps / 100}%
@@ -144,31 +177,48 @@ export function OrdemAMercado({ onFeito }: { onFeito: () => void }) {
           </>
         )}
 
-        {semLiquidez && <Aviso tom="alerta">Não há ordens desse lado do livro para executar.</Aviso>}
+        {semLiquidez && (
+          <Aviso tom="alerta">
+            Não há ordens desse lado do livro para executar.
+          </Aviso>
+        )}
         {semSaldo && (
           <Aviso tom="alerta">
-            Saldo de {tokenQueSai.symbol} insuficiente — a tolerância reserva um pouco mais
-            que o valor simulado.
+            Saldo de {tokenQueSai.symbol} insuficiente — a tolerância reserva um
+            pouco mais que o valor simulado.
           </Aviso>
         )}
 
+        {/*
+          Duas transacoes, duas etapas visiveis. O botao de aprovar NAO some
+          depois de usado: quando ele sumia, o aluno assinava o `approve`, via o
+          aviso verde e achava que a ordem tinha ido a mercado.
+        */}
+        <p className="text-sm text-muted-foreground">
+          Ir a mercado são <strong>duas transações</strong>: a aprovação apenas
+          escreve uma permissão, e é o passo 2 que atravessa o livro.
+        </p>
+
         <div className="flex flex-wrap gap-3">
-          {precisaAprovar && (
-            <Botao
-              disabled={!isConnected || txAprovar.ocupada}
-              onClick={async () => {
-                await txAprovar.enviar({
-                  address: tokenQueSai.address,
-                  abi: abis.token,
-                  functionName: "approve",
-                  args: [CONTRACTS.orderBook, maxUint256],
-                });
-                refetch();
-              }}
-            >
-              {txAprovar.ocupada ? "Processando…" : `Aprovar ${tokenQueSai.symbol}`}
-            </Botao>
-          )}
+          <Botao
+            variante={precisaAprovar ? "primario" : "secundario"}
+            disabled={!isConnected || !precisaAprovar || txAprovar.ocupada}
+            onClick={async () => {
+              await txAprovar.enviar({
+                address: tokenQueSai.address,
+                abi: abis.token,
+                functionName: "approve",
+                args: [CONTRACTS.orderBook, maxUint256],
+              });
+              refetch();
+            }}
+          >
+            {txAprovar.ocupada
+              ? "Processando…"
+              : precisaAprovar
+                ? `Passo 1 de 2 · Aprovar ${tokenQueSai.symbol}`
+                : `Passo 1 de 2 · ${tokenQueSai.symbol} aprovado ✓`}
+          </Botao>
           <Botao
             disabled={
               !isConnected ||
@@ -191,17 +241,30 @@ export function OrdemAMercado({ onFeito }: { onFeito: () => void }) {
               onFeito();
             }}
           >
-            {txOrdem.ocupada ? "Executando…" : comprando ? "Comprar a mercado" : "Vender a mercado"}
+            {txOrdem.ocupada
+              ? "Executando…"
+              : comprando
+                ? "Passo 2 de 2 · Comprar a mercado"
+                : "Passo 2 de 2 · Vender a mercado"}
           </Botao>
         </div>
 
-        <StatusTx tx={txAprovar} sucesso="Aprovado." />
-        <StatusTx tx={txOrdem} sucesso="Livro atravessado. Veja quais linhas desapareceram." />
+        {!txOrdem.hash && (
+          <StatusTx
+            tx={txAprovar}
+            sucesso="Aprovado — e nenhum token saiu da sua carteira ainda. Falta o passo 2: mande a ordem a mercado."
+          />
+        )}
+        <StatusTx
+          tx={txOrdem}
+          sucesso="Livro atravessado. Veja quais linhas desapareceram."
+        />
 
         <NotaDeAula>
-          Compare este slippage com o do mesmo volume no pool, no card acima. Os dois
-          mercados cobram de você por tamanho — mas aqui o custo é a escada que alguém
-          construiu, e no pool é uma fórmula que não depende de ninguém aparecer.
+          Compare este slippage com o do mesmo volume no pool, no card acima. Os
+          dois mercados cobram de você por tamanho — mas aqui o custo é a escada
+          que alguém construiu, e no pool é uma fórmula que não depende de
+          ninguém aparecer.
         </NotaDeAula>
       </div>
     </Card>

@@ -13,7 +13,8 @@ import { usePoolData, useDepositosDoAluno } from "@/hooks/usePool";
  * diferença é a perda impermanente.
  */
 export function PainelIL({ pool }: { pool: Address }) {
-  const { spot, minhaPosicao0, minhaPosicao1, minhasShares } = usePoolData(pool);
+  const { spot, minhaPosicao0, minhaPosicao1, minhasShares } =
+    usePoolData(pool);
   const { data: depositos } = useDepositosDoAluno(pool);
 
   if (!minhasShares || minhasShares === 0n) {
@@ -26,10 +27,15 @@ export function PainelIL({ pool }: { pool: Address }) {
     );
   }
 
-  if (!depositos || !spot || minhaPosicao0 === undefined || minhaPosicao1 === undefined) {
+  if (
+    !depositos ||
+    !spot ||
+    minhaPosicao0 === undefined ||
+    minhaPosicao1 === undefined
+  ) {
     return (
       <Card titulo="Sua posição de LP">
-        <p className="text-sm text-slate-400">Carregando…</p>
+        <p className="text-sm text-muted-foreground">Carregando…</p>
       </Card>
     );
   }
@@ -38,7 +44,8 @@ export function PainelIL({ pool }: { pool: Address }) {
   const num = (v: bigint) => Number(formatUnits(v, 18));
 
   const valorNoPool = num(minhaPosicao0) * preco + num(minhaPosicao1);
-  const valorSeTivesseGuardado = num(depositos.total0) * preco + num(depositos.total1);
+  const valorSeTivesseGuardado =
+    num(depositos.total0) * preco + num(depositos.total1);
   const diferenca = valorNoPool - valorSeTivesseGuardado;
   const diferencaPct =
     valorSeTivesseGuardado > 0 ? (diferenca / valorSeTivesseGuardado) * 100 : 0;
@@ -46,17 +53,25 @@ export function PainelIL({ pool }: { pool: Address }) {
   const perdendo = diferenca < 0;
 
   return (
-    <Card titulo="Sua posição de LP" subtitulo="Tudo medido em BRLX, ao preço deste instante" destaque={perdendo}>
+    <Card
+      titulo="Sua posição de LP"
+      subtitulo="Tudo medido em BRLX, ao preço deste instante"
+      destaque={perdendo}
+    >
       <dl className="grid gap-5 sm:grid-cols-2">
         <Stat
           rotulo="No pool agora"
-          valor={valorNoPool.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}
+          valor={valorNoPool.toLocaleString("pt-BR", {
+            maximumFractionDigits: 2,
+          })}
           sufixo="BRLX"
           dica={`${num(minhaPosicao0).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} CSR + ${num(minhaPosicao1).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} BRLX`}
         />
         <Stat
           rotulo="Se tivesse só guardado"
-          valor={valorSeTivesseGuardado.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}
+          valor={valorSeTivesseGuardado.toLocaleString("pt-BR", {
+            maximumFractionDigits: 2,
+          })}
           sufixo="BRLX"
           dica={`${num(depositos.total0).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} CSR + ${num(depositos.total1).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} BRLX`}
         />
@@ -73,23 +88,24 @@ export function PainelIL({ pool }: { pool: Address }) {
       <NotaDeAula>
         {perdendo ? (
           <>
-            Enquanto o preço divergir, ser LP rende menos que ter ficado parado. As taxas
-            trabalham a seu favor e a divergência contra — o saldo entre as duas é o que você
-            vê aí em cima. “Impermanente” só significa que a conta volta se o preço voltar. Se
-            você sair antes, ela virou permanente.
+            Enquanto o preço divergir, ser LP rende menos que ter ficado parado.
+            As taxas trabalham a seu favor e a divergência contra — o saldo
+            entre as duas é o que você vê aí em cima. “Impermanente” só
+            significa que a conta volta se o preço voltar. Se você sair antes,
+            ela virou permanente.
           </>
         ) : (
           <>
-            No momento as taxas cobrem a divergência de preço. Peça ao professor um swap
-            grande e olhe este número de novo.
+            No momento as taxas cobrem a divergência de preço. Peça ao professor
+            um swap grande e olhe este número de novo.
           </>
         )}
         {depositos.aportes > 1 && (
           <>
             {" "}
             <em>
-              (Você fez {depositos.aportes} aportes em preços diferentes — a comparação vira
-              uma aproximação.)
+              (Você fez {depositos.aportes} aportes em preços diferentes — a
+              comparação vira uma aproximação.)
             </em>
           </>
         )}

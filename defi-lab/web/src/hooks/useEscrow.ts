@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useConnection, useReadContracts } from "wagmi";
 import { CONTRACTS, ESTADO, abis, type Acordo } from "@/lib/contracts";
+import { activeChain } from "@/lib/wagmi";
 
 /**
  * Leitura do escrow: todos os acordos, mais os que envolvem quem está conectado.
@@ -12,7 +13,11 @@ import { CONTRACTS, ESTADO, abis, type Acordo } from "@/lib/contracts";
  */
 export function useEscrow() {
   const { address } = useConnection();
-  const base = { address: CONTRACTS.escrow, abi: abis.escrow } as const;
+  const base = {
+    address: CONTRACTS.escrow,
+    abi: abis.escrow,
+    chainId: activeChain.id,
+  } as const;
 
   const { data, refetch, isLoading } = useReadContracts({
     contracts: [
@@ -56,7 +61,10 @@ export function useAgora(intervaloMs = 1000) {
   const [agora, setAgora] = useState(() => Math.floor(Date.now() / 1000));
 
   useEffect(() => {
-    const t = setInterval(() => setAgora(Math.floor(Date.now() / 1000)), intervaloMs);
+    const t = setInterval(
+      () => setAgora(Math.floor(Date.now() / 1000)),
+      intervaloMs,
+    );
     return () => clearInterval(t);
   }, [intervaloMs]);
 

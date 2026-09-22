@@ -1,26 +1,200 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * DeFi Lab — sistema visual
+ *
+ * A tela e lida em dois lugares ao mesmo tempo: um projetor de sala iluminada
+ * e um celular no 4G. Projetor lava cinza claro, entao nenhum texto aqui fica
+ * abaixo de 4.5:1 sobre o fundo em que ele de fato aparece, e as bordas sao
+ * mais escuras do que pareceria necessario num monitor.
+ *
+ * O ambar (#F7A600) e a marca da Bybit e e o unico accent. Sobre branco ele
+ * rende 1.9:1, entao ele vive como PREENCHIMENTO e FIO — nunca como texto.
+ * Texto de alerta usa `--warn`, que e o mesmo ambar escurecido ate passar AA.
+ */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Semantica do lab. Cor aqui e estado, nunca decoracao. */
+  --color-up: var(--up);
+  --color-up-surface: var(--up-surface);
+  --color-up-border: var(--up-border);
+  --color-down: var(--down);
+  --color-down-surface: var(--down-surface);
+  --color-down-border: var(--down-border);
+  --color-warn: var(--warn);
+  --color-warn-surface: var(--warn-surface);
+  --color-warn-border: var(--warn-border);
+  --color-signal: var(--signal);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/*
+ * Fontes fora do bloco `inline` de proposito.
+ *
+ * `@theme inline` grava o valor direto na utilitaria; `@theme` emite a variavel
+ * em :root e a utilitaria aponta para ela. Como o next/font so define
+ * `--font-plex-sans` no <html> em runtime, a segunda forma e a que resolve.
+ */
+@theme {
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --font-heading: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --radius: 0.625rem;
+
+  --background: #f2f5f8;
+  --foreground: #0b1220;
+
+  --card: #ffffff;
+  --card-foreground: #0b1220;
+  --popover: #ffffff;
+  --popover-foreground: #0b1220;
+
+  --primary: #0b1220;
+  --primary-foreground: #ffffff;
+
+  --secondary: #e8edf3;
+  --secondary-foreground: #0b1220;
+
+  --muted: #eef2f7;
+  /* 6,36:1 sobre cartao branco. O slate-400 que estava aqui dava 2,56:1. */
+  --muted-foreground: #51607a;
+
+  --accent: #e8edf3;
+  --accent-foreground: #0b1220;
+
+  --destructive: #be123c;
+
+  --border: #c4cedb;
+  --input: #b9c3d0;
+  --ring: #f7a600;
+
+  /* Subiu: 5,48:1 sobre branco */
+  --up: #047857;
+  --up-surface: #e6f4ee;
+  --up-border: #9dd3bd;
+
+  /* Desceu: 6,29:1 sobre branco */
+  --down: #be123c;
+  --down-surface: #fdecef;
+  --down-border: #f3afbf;
+
+  /* Ambar da Bybit, escurecido ate 6,33:1 para poder virar texto */
+  --warn: #8a5300;
+  --warn-surface: #fff5e3;
+  --warn-border: #edc47a;
+
+  /* O ambar da marca, puro. So preenchimento e fio. */
+  --signal: #f7a600;
+}
+
+.dark {
+  --background: #0a0e15;
+  --foreground: #e9eef5;
+
+  --card: #131a24;
+  --card-foreground: #e9eef5;
+  --popover: #131a24;
+  --popover-foreground: #e9eef5;
+
+  --primary: #f7a600;
+  --primary-foreground: #1a1200;
+
+  --secondary: #1e2735;
+  --secondary-foreground: #e9eef5;
+
+  --muted: #1a2230;
+  --muted-foreground: #9aa8bd;
+
+  --accent: #1e2735;
+  --accent-foreground: #e9eef5;
+
+  --destructive: #f2607f;
+
+  --border: #26303f;
+  --input: #34405270;
+  --ring: #f7a600;
+
+  --up: #35d39a;
+  --up-surface: #0d2a22;
+  --up-border: #1c5a47;
+
+  --down: #f2607f;
+  --down-surface: #2c1019;
+  --down-border: #5e2234;
+
+  --warn: #f0b64a;
+  --warn-surface: #2a1e07;
+  --warn-border: #5a4415;
+
+  --signal: #f7a600;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Texto corrido em 16px: a ultima fileira da sala tambem le. */
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  /*
+   * Todo numero do lab e tabular. Coluna de numero que dança de largura a cada
+   * refresh nao se le de longe — e esta app atualiza os numeros a cada 2 s.
+   */
+  .tnum,
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -2,6 +2,7 @@
 
 import { useConnection, useReadContracts } from "wagmi";
 import { CONTRACTS, LADO, abis, type Ordem } from "@/lib/contracts";
+import { activeChain } from "@/lib/wagmi";
 
 /**
  * Leitura completa do livro de ordens.
@@ -12,7 +13,11 @@ import { CONTRACTS, LADO, abis, type Ordem } from "@/lib/contracts";
  */
 export function useLivro() {
   const { address } = useConnection();
-  const base = { address: CONTRACTS.orderBook, abi: abis.livro } as const;
+  const base = {
+    address: CONTRACTS.orderBook,
+    abi: abis.livro,
+    chainId: activeChain.id,
+  } as const;
 
   const { data, refetch, isLoading } = useReadContracts({
     contracts: [
@@ -26,18 +31,24 @@ export function useLivro() {
   });
 
   const ordens = (data?.[0]?.result as readonly Ordem[] | undefined) ?? [];
-  const melhorCompra = data?.[1]?.result as readonly [bigint, bigint] | undefined;
-  const melhorVenda = data?.[2]?.result as readonly [bigint, bigint] | undefined;
+  const melhorCompra = data?.[1]?.result as
+    readonly [bigint, bigint] | undefined;
+  const melhorVenda = data?.[2]?.result as
+    readonly [bigint, bigint] | undefined;
 
   // Vendas: menor preço primeiro (o mais barato é o melhor para quem compra).
   const vendas = ordens
     .filter((o) => Number(o.lado) === LADO.venda)
-    .sort((a, b) => (a.preco === b.preco ? Number(a.id - b.id) : a.preco < b.preco ? -1 : 1));
+    .sort((a, b) =>
+      a.preco === b.preco ? Number(a.id - b.id) : a.preco < b.preco ? -1 : 1,
+    );
 
   // Compras: maior preço primeiro.
   const compras = ordens
     .filter((o) => Number(o.lado) === LADO.compra)
-    .sort((a, b) => (a.preco === b.preco ? Number(a.id - b.id) : a.preco > b.preco ? -1 : 1));
+    .sort((a, b) =>
+      a.preco === b.preco ? Number(a.id - b.id) : a.preco > b.preco ? -1 : 1,
+    );
 
   const minhas = address
     ? ordens.filter((o) => o.dono.toLowerCase() === address.toLowerCase())
@@ -55,7 +66,10 @@ export function useLivro() {
     ordensVivas: data?.[4]?.result as bigint | undefined,
     /** Preço do meio: a referência que a tela usa quando não há negócio fechado. */
     meio:
-      melhorCompra?.[0] && melhorVenda?.[0] && melhorCompra[0] > 0n && melhorVenda[0] > 0n
+      melhorCompra?.[0] &&
+      melhorVenda?.[0] &&
+      melhorCompra[0] > 0n &&
+      melhorVenda[0] > 0n
         ? (melhorCompra[0] + melhorVenda[0]) / 2n
         : undefined,
     refetch,

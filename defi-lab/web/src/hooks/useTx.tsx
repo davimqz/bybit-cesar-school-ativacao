@@ -1,34 +1,102 @@
 "use client";
 
-import { useCallback } from "react";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useCallback, useState } from "react";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useConnection,
+  useSwitchChain,
+} from "wagmi";
 import { BaseError } from "viem";
 import { linkExplorer } from "@/lib/contracts";
+import { activeChain } from "@/lib/wagmi";
 import { Aviso } from "@/components/ui";
 
 /**
  * Envia uma transação e expõe os quatro estados que importam numa aula:
  * assinando, minerando, confirmada, falhou.
  *
- * O detalhe que mais importa aqui é `mensagemDeErro`: a MetaMask devolve
+ * O detalhe que mais importa aqui é `traduzirErro`: a MetaMask devolve
  * paredes de texto. Quarenta alunos travados num erro ilegível é o pior
  * cenário possível ao vivo, então traduzimos os casos comuns.
+ *
+ * Este hook é o único caminho de escrita do app inteiro, e é por isso que a
+ * trava de rede mora aqui e não em cada botão: um botão esquecido significaria
+ * um aluno gastando ETH de verdade.
  */
 export function useTx() {
-  const { writeContractAsync, data: hash, isPending: assinando, error, reset } = useWriteContract();
-  const { isLoading: minerando, isSuccess: confirmada } = useWaitForTransactionReceipt({ hash });
+  const {
+    writeContractAsync,
+    data: hash,
+    isPending: assinando,
+    error,
+    reset,
+  } = useWriteContract();
+  const { isLoading: minerando, isSuccess: confirmada } =
+    useWaitForTransactionReceipt({
+      hash,
+      // Espera o recibo na rede da aula, não na que a carteira estiver.
+      chainId: activeChain.id,
+    });
+
+  /**
+   * A rede REAL da carteira — e não `useChainId()`.
+   *
+   * Existem dois "chainId" no wagmi e eles discordam justamente no caso que
+   * importa. `useChainId()` devolve `config.state.chainId`, que é a rede que a
+   * *config* considera atual e só assume valores da lista `chains`. Com a
+   * carteira na Ethereum (chain 1, fora da lista), ele continua respondendo
+   * Sepolia — a comparação dá "tudo certo" e a troca nunca dispara.
+   *
+   * `useConnection().chainId` é a rede do connector, ou seja, onde a carteira
+   * está de verdade. É a única que serve para decidir se precisa trocar.
+   */
+  const { chainId: chainIdDaCarteira } = useConnection();
+  const redeErrada =
+    chainIdDaCarteira !== undefined && chainIdDaCarteira !== activeChain.id;
+
+  const { switchChainAsync } = useSwitchChain();
+  const [erroRede, setErroRede] = useState<string | undefined>();
 
   const enviar = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (params: any) => {
+      setErroRede(undefined);
+
       try {
-        return await writeContractAsync(params);
-      } catch {
-        // O erro já vive em `error`; não estouramos para não derrubar a página.
+        /**
+         * Rede errada: troque ANTES de montar a transação.
+         *
+         * Sem isto, o wagmi usa a rede em que a carteira estiver. Os endereços
+         * do lab só existem na rede da aula, então na mainnet a transação vai
+         * para um endereço sem contrato: ela não faz nada e mesmo assim cobra
+         * gas — em ETH de verdade. Foi o que aconteceu no faucet.
+         */
+        if (redeErrada) {
+          await switchChainAsync({ chainId: activeChain.id });
+        }
+
+        /**
+         * E o cinto de segurança: com `chainId` explícito, o wagmi recusa a
+         * transação se a carteira ainda estiver em outra rede, em vez de
+         * assiná-la. Vale mesmo que a troca acima falhe em silêncio.
+         */
+        return await writeContractAsync({ ...params, chainId: activeChain.id });
+      } catch (e) {
+        // Erro de troca de rede não passa pelo `error` do useWriteContract.
+        if (redeErrada) {
+          setErroRede(
+            `A troca para ${activeChain.name} não foi concluída. Se a MetaMask não ` +
+              `ofereceu a rede, abra Configurações → Redes e ligue “Mostrar redes de ` +
+              `teste”; depois clique de novo.`,
+          );
+        }
+        // O resto já vive em `error`; não estouramos para não derrubar a página.
+        void e;
         return undefined;
       }
     },
-    [writeContractAsync],
+    [writeContractAsync, switchChainAsync, redeErrada],
   );
 
   return {
@@ -39,7 +107,9 @@ export function useTx() {
     minerando,
     confirmada,
     ocupada: assinando || minerando,
-    erro: error ? traduzirErro(error) : undefined,
+    /** True quando a carteira não está na rede da aula. A UI desabilita o botão. */
+    redeErrada,
+    erro: erroRede ?? (error ? traduzirErro(error) : undefined),
   };
 }
 
@@ -48,6 +118,17 @@ export type Tx = ReturnType<typeof useTx>;
 function traduzirErro(erro: Error): string {
   const bruto = erro instanceof BaseError ? erro.shortMessage : erro.message;
 
+  if (
+    /chain mismatch|does not match the target chain|chain of the connector/i.test(
+      bruto,
+    )
+  ) {
+    return (
+      `Sua carteira está em outra rede, e o app não deixa assinar assim. ` +
+      `Troque para ${activeChain.name} — na rede errada a transação cobraria ` +
+      `gas de verdade sem fazer nada, porque os contratos da aula não existem lá.`
+    );
+  }
   if (/User rejected|denied transaction/i.test(bruto)) {
     return "Você recusou a transação na MetaMask.";
   }
@@ -147,13 +228,33 @@ function traduzirErro(erro: Error): string {
   return bruto;
 }
 
-export function StatusTx({ tx, sucesso = "Confirmada." }: { tx: Tx; sucesso?: string }) {
+export function StatusTx({
+  tx,
+  sucesso = "Confirmada.",
+}: {
+  tx: Tx;
+  sucesso?: string;
+}) {
   if (tx.erro) return <Aviso tom="erro">{tx.erro}</Aviso>;
 
-  if (tx.assinando) return <Aviso tom="info">Aguardando sua assinatura na MetaMask…</Aviso>;
+  // Antes de o aluno clicar: diga que o botão não vai funcionar, e por quê.
+  if (tx.redeErrada) {
+    return (
+      <Aviso tom="alerta">
+        Sua carteira não está na <strong>{activeChain.name}</strong>. Ao clicar,
+        o app vai pedir a troca de rede antes de qualquer assinatura — nenhuma
+        transação sai na rede errada.
+      </Aviso>
+    );
+  }
+
+  if (tx.assinando)
+    return <Aviso tom="info">Aguardando sua assinatura na MetaMask…</Aviso>;
 
   if (tx.minerando) {
-    return <Aviso tom="info">Transação enviada. Esperando entrar num bloco…</Aviso>;
+    return (
+      <Aviso tom="info">Transação enviada. Esperando entrar num bloco…</Aviso>
+    );
   }
 
   if (tx.confirmada && tx.hash) {
@@ -162,7 +263,12 @@ export function StatusTx({ tx, sucesso = "Confirmada." }: { tx: Tx; sucesso?: st
       <Aviso tom="info">
         {sucesso}{" "}
         {link && (
-          <a href={link} target="_blank" rel="noreferrer" className="font-semibold underline">
+          <a
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold underline"
+          >
             ver no explorador
           </a>
         )}
