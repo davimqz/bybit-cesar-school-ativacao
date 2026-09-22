@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { usePublicClient } from "wagmi";
 import type { AbiEvent, Address, Hash } from "viem";
-import { activeChain } from "@/lib/wagmi";
+import { clienteDeLogs } from "@/lib/wagmi";
 import {
   CONTRACTS,
   DEPLOY_BLOCK,
@@ -306,7 +305,6 @@ function descrever(log: LogDecodificado): Omit<EventoDaTurma, "id"> | undefined 
 }
 
 export function useFeedDaTurma(intervaloMs = 4000) {
-  const client = usePublicClient({ chainId: activeChain.id });
   const [eventos, setEventos] = useState<EventoDaTurma[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | undefined>();
@@ -317,11 +315,11 @@ export function useFeedDaTurma(intervaloMs = 4000) {
   const ocupado = useRef(false);
 
   const varrer = useCallback(async () => {
-    if (!client || ocupado.current) return;
+    if (ocupado.current) return;
     ocupado.current = true;
 
     try {
-      const ultimo = await client.getBlockNumber();
+      const ultimo = await clienteDeLogs.getBlockNumber();
 
       if (proximoBloco.current === undefined) {
         const janela = ultimo > JANELA_MAXIMA ? ultimo - JANELA_MAXIMA : 0n;
@@ -330,7 +328,7 @@ export function useFeedDaTurma(intervaloMs = 4000) {
       }
       if (proximoBloco.current > ultimo) return;
 
-      const logs = (await client.getLogs({
+      const logs = (await clienteDeLogs.getLogs({
         address: [...CONTRATOS],
         events: EVENTOS,
         fromBlock: proximoBloco.current,
@@ -367,7 +365,7 @@ export function useFeedDaTurma(intervaloMs = 4000) {
       ocupado.current = false;
       setCarregando(false);
     }
-  }, [client]);
+  }, []);
 
   useEffect(() => {
     // A primeira varredura sai por um timer de 0 em vez de direto no corpo do

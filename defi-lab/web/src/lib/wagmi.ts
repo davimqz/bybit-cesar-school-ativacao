@@ -1,7 +1,7 @@
 import { http, createConfig, createStorage, cookieStorage } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import { injected } from "wagmi/connectors";
-import { defineChain } from "viem";
+import { createPublicClient, defineChain } from "viem";
 import deployment from "./deployment.json";
 
 /** Nó local do Hardhat — usado no ensaio da aula. */
@@ -30,6 +30,43 @@ export const activeChain =
 const SEPOLIA_RPC =
   process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL ??
   "https://ethereum-sepolia-rpc.publicnode.com";
+
+/**
+ * RPC das consultas de log (`eth_getLogs`).
+ *
+ * Separado do de cima porque os dois gargalos sao opostos. O endpoint
+ * dedicado aguenta a turma inteira lendo saldo a cada 2 s, mas no plano
+ * gratuito da Alchemy ele recusa `eth_getLogs` com janela maior que dez
+ * blocos:
+ *
+ *   "Under the Free tier plan, you can make eth_getLogs requests with up to
+ *    a 10 block range."
+ *
+ * E tanto o telao quanto o painel de IL varrem tudo desde o `deployBlock` -
+ * mais de mil blocos antes de a aula comecar. O RPC publico faz a janela
+ * inteira sem reclamar, e o volume de logs e baixo: uma varredura a cada 4 s
+ * no telao (uma maquina so) e uma a cada 8 s por aluno que abre o painel.
+ *
+ * Se o plano do provedor subir, aponte `NEXT_PUBLIC_LOGS_RPC_URL` para ele
+ * tambem e tudo volta a sair de um endereco so.
+ */
+const LOGS_RPC =
+  process.env.NEXT_PUBLIC_LOGS_RPC_URL ??
+  "https://ethereum-sepolia-rpc.publicnode.com";
+
+/**
+ * Cliente de leitura exclusivo dos logs.
+ *
+ * Fica fora do wagmi de proposito: o wagmi tem um transporte por chain, e
+ * aqui a mesma chain precisa de dois. Nao tem estado de carteira, entao um
+ * cliente por carregamento basta.
+ */
+export const clienteDeLogs = createPublicClient({
+  chain: activeChain,
+  transport: http(
+    activeChain.id === hardhatLocal.id ? "http://127.0.0.1:8545" : LOGS_RPC,
+  ),
+});
 
 export const config = createConfig({
   chains: [sepolia, hardhatLocal],

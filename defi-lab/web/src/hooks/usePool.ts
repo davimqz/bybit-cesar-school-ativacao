@@ -1,11 +1,11 @@
 "use client";
 
-import { useConnection, useReadContracts, usePublicClient } from "wagmi";
+import { useConnection, useReadContracts } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { parseAbiItem, type Address } from "viem";
 import { abis, CONTRACTS } from "@/lib/contracts";
 import deployment from "@/lib/deployment.json";
-import { activeChain } from "@/lib/wagmi";
+import { activeChain, clienteDeLogs } from "@/lib/wagmi";
 
 /** Leitura completa de um pool + a posição do aluno nele. */
 export function usePoolData(pool: Address) {
@@ -108,17 +108,15 @@ const EVENTO_LIQUIDEZ_ADICIONADA = parseAbiItem(
  */
 export function useDepositosDoAluno(pool: Address) {
   const { address } = useConnection();
-  const publicClient = usePublicClient();
 
   return useQuery({
     queryKey: ["depositos", pool, address],
-    enabled: !!address && !!publicClient,
+    enabled: !!address,
     refetchInterval: 8000,
     queryFn: async () => {
-      if (!publicClient || !address)
-        return { total0: 0n, total1: 0n, aportes: 0 };
+      if (!address) return { total0: 0n, total1: 0n, aportes: 0 };
 
-      const logs = await publicClient.getLogs({
+      const logs = await clienteDeLogs.getLogs({
         address: pool,
         event: EVENTO_LIQUIDEZ_ADICIONADA,
         args: { provider: address },
