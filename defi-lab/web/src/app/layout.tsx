@@ -15,6 +15,7 @@ const NAV = [
   { href: "/pool", rotulo: "Pool de liquidez" },
   { href: "/trade", rotulo: "Trade" },
   { href: "/staking", rotulo: "Staking" },
+  { href: "/escrow", rotulo: "Escrow" },
   { href: "/telao", rotulo: "Telão" },
 ];
 

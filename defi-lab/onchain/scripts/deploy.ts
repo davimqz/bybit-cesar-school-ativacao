@@ -147,6 +147,14 @@ const staking = await viem.deployContract("MiniStaking", [
 ]);
 console.log(`      staking ${staking.address}`);
 
+// --- Escrow -----------------------------------------------------------------
+
+// Nao ha o que semear: os acordos nascem entre alunos, com o professor como
+// arbitro. O front ja preenche o campo de arbitro com o endereco daqui.
+etapa("Publicando escrow...");
+const escrow = await viem.deployContract("MiniEscrow", [brlx.address]);
+console.log(`      escrow ${escrow.address}`);
+
 // --- Semeando liquidez ------------------------------------------------------
 
 etapa("Semeando liquidez...");
@@ -222,6 +230,7 @@ const deployment = {
     poolRaso: poolRaso.address,
     orderBook: orderBook.address,
     staking: staking.address,
+    escrow: escrow.address,
   },
 };
 

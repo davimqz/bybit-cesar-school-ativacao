@@ -1,7 +1,7 @@
-# Roteiro — Labs de Pool de Liquidez, Trade e Staking
+# Roteiro — Labs de Pool, Trade, Staking e Escrow
 
-Duração: ~72 min (45 do lab de AMM + 15 do livro de ordens + 12 do staking).
-Com os cinco labs prontos, vira uma aula de 90 min — ver o escopo geral.
+Duração: ~87 min (45 do lab de AMM + 15 do livro de ordens + 12 do staking +
+15 do escrow). Com os cinco labs prontos, vira uma aula de 90 min.
 
 Abra em duas janelas: **`/telao`** no projetor e **`/professor`** na sua tela.
 
@@ -180,7 +180,49 @@ rendendo nada.
 
 ---
 
-## 7 · Fechamento (2 min)
+## 7 · Quando o código não basta (15 min) — lab de escrow
+
+Este lab termina com a turma desconfortável, e é assim que ele tem que terminar.
+
+Abra `/escrow`. Peça que se organizem **em duplas**: um é comprador, o outro
+vendedor. Cada dupla troca endereços.
+
+**Sequência:**
+
+1. O comprador cria um acordo de 300 BRLX com prazo de 5 minutos. O dinheiro sai
+   da carteira dele **na hora** — mostre o saldo caindo.
+2. O vendedor clica em **Marcar como enviado**.
+
+   > "Nenhuma prova foi pedida. A blockchain não sabe se uma caixa saiu de um
+   > galpão, e nunca vai saber. Toda a confiança deste contrato está fora dele."
+
+3. O comprador libera. Caminho feliz, sem árbitro nenhum. É a maioria dos casos.
+
+**Depois, o caso que interessa:** peça a **uma dupla** que faça o seguinte — o
+comprador cria o acordo, o vendedor **não marca envio**, e o comprador abre
+disputa.
+
+`/professor` → cartão **Disputas no escrow** → **Decidir pelo vendedor**.
+
+Diga em voz alta o que você está fazendo:
+
+> "O vendedor não entregou nada. Eu sei disso. Estou decidindo a favor dele de
+> propósito, e o contrato vai executar isso em dois segundos, sem recurso. Não
+> houve bug, não houve hack: o código funcionou perfeitamente. O que falhou foi
+> a parte que nunca foi código — eu."
+
+Feche com a pergunta:
+
+> "Quando vocês assinaram aquele acordo, escolheram quem decidiria. Alguém leu
+> qual era o endereço do árbitro antes de depositar?"
+
+**Terceiro caso, se der tempo:** um comprador cria acordo com prazo de 5 min e o
+vendedor não faz nada. Passado o prazo, o botão **Cancelar e ser reembolsado**
+aparece sozinho. O relógio é o único árbitro que não tem interesse próprio.
+
+---
+
+## 8 · Fechamento (2 min)
 
 Volte à home e mostre a lista de contratos, cada um linkado no Etherscan.
 
@@ -200,4 +242,5 @@ Volte à home e mostre a lista de contratos, cada um linkado no Etherscan.
 | `GasFaucet` secou no meio | Mande ETH direto para o endereço do faucet; o saldo atualiza na hora |
 | Livro de ordens zerado | `/trade` com a sua carteira: três ordens de cada lado em volta de 2,00 devolvem o lab |
 | Reserva do cofre secou | `/professor` → **Abastecer** no cartão do cofre; o rendimento volta no mesmo bloco |
+| Aluno travou dinheiro no escrow | `/professor` → **Disputas**; se não houver disputa aberta, peça que ele abra uma e resolva |
 | Aluno com carteira travada | Ele acompanha em dupla; a tela do `/telao` mantém todo mundo no mesmo assunto |

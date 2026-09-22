@@ -98,6 +98,29 @@ function traduzirErro(erro: Error): string {
     return "Você está tentando retirar mais do que tem depositado no cofre.";
   }
 
+  // --- Escrow ---
+  if (/PrazoAindaNaoVenceu/i.test(bruto)) {
+    return "O prazo ainda não venceu. Só o relógio libera essa ação — espere a contagem chegar a zero.";
+  }
+  if (/EstadoErrado/i.test(bruto)) {
+    return "O acordo não está mais no estado que essa ação exige. Alguém agiu antes de você — recarregue a lista.";
+  }
+  if (/NaoEhOArbitro/i.test(bruto)) {
+    return "Só o árbitro do acordo resolve a disputa. Nem o comprador nem o vendedor podem.";
+  }
+  if (/NaoEhOComprador/i.test(bruto)) {
+    return "Só o comprador pode fazer isso: é o dinheiro dele que está em custódia.";
+  }
+  if (/NaoEhOVendedor/i.test(bruto)) {
+    return "Só o vendedor pode marcar o envio.";
+  }
+  if (/NaoEhParteDoAcordo/i.test(bruto)) {
+    return "Você não é parte desse acordo.";
+  }
+  if (/ParticipantesRepetidos/i.test(bruto)) {
+    return "Comprador, vendedor e árbitro têm que ser endereços diferentes.";
+  }
+
   return bruto;
 }
 

@@ -8,6 +8,8 @@ import { Card, Stat, Botao, CampoValor, Aviso, NotaDeAula } from "@/components/u
 import { useTx, StatusTx } from "@/hooks/useTx";
 import { usePoolData, useSaldosEAprovacoes } from "@/hooks/usePool";
 import { useStaking } from "@/hooks/useStaking";
+import { useEscrow } from "@/hooks/useEscrow";
+import { CartaoAcordo } from "@/components/escrow/CartaoAcordo";
 import {
   abis,
   CONTRACTS,
@@ -60,6 +62,7 @@ export default function ProfessorPage() {
       <WhaleSwap />
       <EstadoDoLivro />
       <EstadoDoCofre />
+      <Disputas />
       <Mintar habilitado={ehProfessor} />
     </div>
   );
@@ -497,6 +500,41 @@ function EstadoDoCofre() {
         O depósito baleia não tira nada de ninguém: o principal de cada aluno continua
         intacto. O que ele faz é diluir a fatia — e é por isso que o rendimento cai. A
         pergunta para a turma: alguém te avisou antes?
+      </NotaDeAula>
+    </Card>
+  );
+}
+
+/**
+ * A fila de disputas do escrow.
+ *
+ * Reaproveita o cartão do lab: o professor é o árbitro, então os botões de
+ * decidir já aparecem ali. Duplicar a lógica de decisão aqui seria criar um
+ * segundo lugar para ela divergir.
+ */
+function Disputas() {
+  const e = useEscrow();
+
+  return (
+    <Card
+      titulo="Disputas no escrow"
+      subtitulo="Você é o árbitro — o contrato obedece o que você decidir"
+      destaque={e.disputas.length > 0}
+    >
+      {e.disputas.length === 0 ? (
+        <Aviso tom="info">Nenhuma disputa aberta. Os acordos estão seguindo sem você.</Aviso>
+      ) : (
+        <div className="space-y-6">
+          {e.disputas.map((a) => (
+            <CartaoAcordo key={String(a.id)} acordo={a} onFeito={e.refetch} />
+          ))}
+        </div>
+      )}
+
+      <NotaDeAula>
+        Para o efeito da aula, decida uma disputa <strong>contra a evidência</strong> de
+        propósito e diga isso em voz alta. O contrato vai executar sem hesitar, e não há
+        recurso. É a diferença entre "sem intermediário" e "sem ninguém decidindo".
       </NotaDeAula>
     </Card>
   );

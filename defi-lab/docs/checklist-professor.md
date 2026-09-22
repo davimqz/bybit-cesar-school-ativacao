@@ -30,12 +30,15 @@ npm test                       # a suíte tem que passar inteira
 npm run deploy:sepolia
 ```
 
-- [ ] Contratos publicados (são **sete**: CSR, BRLX, GasFaucet, dois pools, o livro e o cofre)
+- [ ] Contratos publicados (são **oito**: CSR, BRLX, GasFaucet, dois pools, o livro,
+      o cofre e o escrow)
 - [ ] `npx hardhat verify` rodado em **todos** eles — os alunos vão ler o código
 - [ ] Livro de ordens semeado — o deploy faz sozinho; confirme em `/trade` que o
       spread aparece e que existem seis ordens vivas
 - [ ] Reserva do cofre de staking abastecida — o deploy coloca 50.000 CSR;
       confirme em `/staking` que "dura mais" passa da duração da aula
+- [ ] Escrow: o lab não precisa de semeadura, mas **você é o árbitro de todos os
+      acordos**. Deixe `/professor` aberto na seção de disputas durante o lab
 - [ ] `web/src/lib/deployment.json` atualizado (o deploy faz sozinho)
 - [ ] Front publicado (Vercel) e testado no celular, **no 4G, não no Wi-Fi**
 - [ ] CSR e BRLX adicionados na sua própria MetaMask
@@ -76,6 +79,9 @@ npm run deploy:sepolia
 | `AutoNegociacao` | O aluno tentou executar a própria ordem. O contrato recusa de propósito |
 | `NadaParaColher` | Não passou tempo suficiente, ou o aluno não depositou no cofre |
 | Rendimento parado em zero | A reserva do cofre secou. `/professor` → **Abastecer** |
+| `EstadoErrado` | O acordo do escrow saiu do estado que a ação exigia — alguém agiu antes |
+| `PrazoAindaNaoVenceu` | A contagem regressiva do escrow não chegou a zero |
+| `NaoEhOArbitro` | Um aluno tentou resolver a própria disputa. Funcionou como deveria |
 
 ## Parâmetros que você pode querer mexer
 

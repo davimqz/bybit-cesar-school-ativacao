@@ -6,6 +6,7 @@ import {
   gasFaucetAbi,
   miniOrderBookAbi,
   miniStakingAbi,
+  miniEscrowAbi,
 } from "./abis";
 
 export const CONTRACTS = {
@@ -16,6 +17,7 @@ export const CONTRACTS = {
   poolRaso: deployment.contracts.poolRaso as Address,
   orderBook: deployment.contracts.orderBook as Address,
   staking: deployment.contracts.staking as Address,
+  escrow: deployment.contracts.escrow as Address,
 } as const;
 
 export const PROFESSOR = deployment.professor as Address;
@@ -27,6 +29,7 @@ export const abis = {
   gasFaucet: gasFaucetAbi,
   livro: miniOrderBookAbi,
   staking: miniStakingAbi,
+  escrow: miniEscrowAbi,
 } as const;
 
 /** Os dois pools da aula. `raso` existe para doer. */
@@ -158,4 +161,70 @@ export function fmtDuracao(segundos: bigint | undefined): string {
   if (d > 0) return `${d} d ${h} h`;
   if (h > 0) return `${h} h ${m} min`;
   return `${m} min`;
+}
+
+// --- Escrow -----------------------------------------------------------------
+
+/** O enum `Estado` do MiniEscrow, na ordem do contrato. */
+export const ESTADO = {
+  financiado: 0,
+  enviado: 1,
+  concluido: 2,
+  reembolsado: 3,
+  emDisputa: 4,
+} as const;
+
+export type Acordo = {
+  id: bigint;
+  comprador: Address;
+  vendedor: Address;
+  arbitro: Address;
+  valor: bigint;
+  prazoEnvio: bigint;
+  momentoEnvio: bigint;
+  estado: number;
+  descricao: string;
+};
+
+/** Rótulo, cor e explicação de cada estado — a tela inteira depende disto. */
+export const ESTADOS: Record<
+  number,
+  { rotulo: string; tom: "neutro" | "bom" | "ruim" | "alerta"; explicacao: string }
+> = {
+  [ESTADO.financiado]: {
+    rotulo: "Financiado",
+    tom: "alerta",
+    explicacao: "O dinheiro está travado no contrato. O vendedor ainda não marcou envio.",
+  },
+  [ESTADO.enviado]: {
+    rotulo: "Enviado",
+    tom: "neutro",
+    explicacao: "O vendedor declarou o envio. O comprador tem uma janela para reclamar.",
+  },
+  [ESTADO.concluido]: {
+    rotulo: "Concluído",
+    tom: "bom",
+    explicacao: "O valor foi para o vendedor. Acordo encerrado, sem volta.",
+  },
+  [ESTADO.reembolsado]: {
+    rotulo: "Reembolsado",
+    tom: "bom",
+    explicacao: "O valor voltou para o comprador. Acordo encerrado, sem volta.",
+  },
+  [ESTADO.emDisputa]: {
+    rotulo: "Em disputa",
+    tom: "ruim",
+    explicacao: "Congelado. Só o árbitro decide agora — nem o relógio resolve.",
+  },
+};
+
+/** Contagem regressiva legível. Negativo vira "venceu". */
+export function fmtRestante(alvo: bigint | undefined, agora: number): string {
+  if (alvo === undefined || alvo === 0n) return "—";
+  const s = Number(alvo) - agora;
+  if (s <= 0) return "venceu";
+  const m = Math.floor(s / 60);
+  const seg = s % 60;
+  if (m >= 60) return `${Math.floor(m / 60)} h ${m % 60} min`;
+  return `${m}:${String(seg).padStart(2, "0")}`;
 }

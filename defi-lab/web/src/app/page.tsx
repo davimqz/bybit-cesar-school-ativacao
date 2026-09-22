@@ -22,7 +22,12 @@ const LABS = [
     conceito: "APR × APY e de onde vem o rendimento",
     pronto: true,
   },
-  { href: "/escrow", titulo: "Escrow", conceito: "custódia condicional e risco de oráculo", pronto: false },
+  {
+    href: "/escrow",
+    titulo: "Escrow",
+    conceito: "custódia condicional e risco de oráculo",
+    pronto: true,
+  },
   { href: "/crowdfunding", titulo: "Crowdfunding", conceito: "arrecadação tudo-ou-nada", pronto: false },
 ];
 
@@ -31,7 +36,7 @@ const PASSOS = [
   "Nas configurações da MetaMask, ative “Mostrar redes de teste”.",
   "Conecte a carteira aqui em cima e troque para a rede Sepolia.",
   "Pegue gas e tokens no Faucet.",
-  "Entre nos labs: Pool de liquidez, Trade e Staking.",
+  "Entre nos labs: Pool de liquidez, Trade, Staking e Escrow.",
 ];
 
 export default function Home() {

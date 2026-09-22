@@ -20,6 +20,7 @@ const CONTRATOS = {
   gasFaucet: "contracts/utils/GasFaucet.sol/GasFaucet.json",
   miniOrderBook: "contracts/orderbook/MiniOrderBook.sol/MiniOrderBook.json",
   miniStaking: "contracts/staking/MiniStaking.sol/MiniStaking.json",
+  miniEscrow: "contracts/escrow/MiniEscrow.sol/MiniEscrow.json",
 };
 
 const partes = [

@@ -2979,3 +2979,612 @@ export const miniStakingAbi = [
     "type": "function"
   }
 ] as const;
+
+export const miniEscrowAbi = [
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "moeda_",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "AcordoInexistente",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "EnderecoInvalido",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum MiniEscrow.Estado",
+        "name": "atual",
+        "type": "uint8"
+      }
+    ],
+    "name": "EstadoErrado",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NaoEhOArbitro",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NaoEhOComprador",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NaoEhOVendedor",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NaoEhParteDoAcordo",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ParticipantesRepetidos",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "vence",
+        "type": "uint256"
+      }
+    ],
+    "name": "PrazoAindaNaoVenceu",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "PrazoInvalido",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ValorInvalido",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "comprador",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "vendedor",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "arbitro",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "valor",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "prazoEnvio",
+        "type": "uint256"
+      }
+    ],
+    "name": "AcordoCriado",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "quem",
+        "type": "address"
+      }
+    ],
+    "name": "DisputaAberta",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "arbitro",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "paraVendedor",
+        "type": "bool"
+      }
+    ],
+    "name": "DisputaResolvida",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "vendedor",
+        "type": "address"
+      }
+    ],
+    "name": "EnvioMarcado",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "para",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "valor",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "motivo",
+        "type": "string"
+      }
+    ],
+    "name": "Liberado",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "para",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "valor",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "motivo",
+        "type": "string"
+      }
+    ],
+    "name": "Reembolsado",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "JANELA_REVISAO",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "abrirDisputa",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "acordo",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "comprador",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "vendedor",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "arbitro",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "valor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prazoEnvio",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "momentoEnvio",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum MiniEscrow.Estado",
+            "name": "estado",
+            "type": "uint8"
+          },
+          {
+            "internalType": "string",
+            "name": "descricao",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct MiniEscrow.Acordo",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "quem",
+        "type": "address"
+      }
+    ],
+    "name": "acordosDe",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "ids",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "cancelarPorPrazo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vendedor",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "arbitro",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "valor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "prazoSegundos",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "descricao",
+        "type": "string"
+      }
+    ],
+    "name": "criar",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "emCustodia",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "soma",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "liberar",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "liberarPorPrazo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "marcarEnviado",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "moeda",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "paraVendedor",
+        "type": "bool"
+      }
+    ],
+    "name": "resolver",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "todos",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "comprador",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "vendedor",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "arbitro",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "valor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prazoEnvio",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "momentoEnvio",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum MiniEscrow.Estado",
+            "name": "estado",
+            "type": "uint8"
+          },
+          {
+            "internalType": "string",
+            "name": "descricao",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct MiniEscrow.Acordo[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "total",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "venceEm",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const;

@@ -24,11 +24,13 @@ defi-lab/
 | `MiniAMM` — pool `x·y=k`, taxa 0,3%, shares de LP | pronto |
 | `MiniOrderBook` — livro custodiado, prioridade preço-tempo | pronto |
 | `MiniStaking` — emissão por segundo, reserva finita, APR × APY | pronto |
+| `MiniEscrow` — custódia condicional, prazos e árbitro humano | pronto |
 | Lab de **pool de liquidez** (swap, LP, slippage, IL, curva ao vivo) | pronto |
 | Lab de **trade** (livro ao vivo, spread, travessia, maker × taker) | pronto |
 | Lab de **staking** (de onde vem o rendimento, diluição, reinvestir) | pronto |
+| Lab de **escrow** (máquina de estados, prazos, risco de oráculo) | pronto |
 | Página de faucet, telão e painel do professor | pronto |
-| Labs de escrow e crowdfunding | a construir |
+| Lab de crowdfunding | a construir |
 
 ## Começando (ensaio local)
 

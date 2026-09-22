@@ -1,16 +1,17 @@
 {
   "chainId": 31337,
   "network": "localhost",
-  "deployedAt": "2026-09-22T00:53:38.819Z",
-  "deployBlock": "101",
+  "deployedAt": "2026-09-22T01:03:30.691Z",
+  "deployBlock": "135",
   "professor": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
   "contracts": {
-    "csr": "0x4c4a2f8c81640e47606d3fd77b353e87ba015584",
-    "brlx": "0x21df544947ba3e8b3c32561399e88b52dc8b2823",
-    "gasFaucet": "0x2e2ed0cfd3ad2f1d34481277b3204d807ca2f8c2",
-    "poolFundo": "0xd8a5a9b31c3c0232e196d518e89fd8bf83acad43",
-    "poolRaso": "0xdc11f7e700a4c898ae5caddb1082cffa76512add",
-    "orderBook": "0x51a1ceb83b83f1985a81c295d1ff28afef186e02",
-    "staking": "0x36b58f5c1969b7b6591d752ea6f5486d069010ab"
+    "csr": "0x86a2ee8faf9a840f7a2c64ca3d51209f9a02081d",
+    "brlx": "0xa4899d35897033b927acfcf422bc745916139776",
+    "gasFaucet": "0xf953b3a269d80e3eb0f2947630da976b896a8c5b",
+    "poolFundo": "0xaa292e8611adf267e563f334ee42320ac96d0463",
+    "poolRaso": "0x5c74c94173f05da1720953407cbb920f3df9f887",
+    "orderBook": "0x720472c8ce72c2a2d711333e064abd3e6bbeadd3",
+    "staking": "0xe8d2a1e88c91dcd5433208d4152cc4f399a7e91d",
+    "escrow": "0x5067457698fd6fa1c6964e416b3f42713513b3dd"
   }
 }
