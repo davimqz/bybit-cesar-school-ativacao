@@ -3588,3 +3588,537 @@ export const miniEscrowAbi = [
     "type": "function"
   }
 ] as const;
+
+export const miniCrowdfundingAbi = [
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "moeda_",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "prazo",
+        "type": "uint256"
+      }
+    ],
+    "name": "AindaPodeBaterAMeta",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "CampanhaInexistente",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "JaFoiSacada",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MetaFoiBatida",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MetaInvalida",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "arrecadado",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "meta",
+        "type": "uint256"
+      }
+    ],
+    "name": "MetaNaoBatida",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NadaParaReembolsar",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NaoEhOCriador",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "prazo",
+        "type": "uint256"
+      }
+    ],
+    "name": "PrazoEncerrado",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "PrazoInvalido",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ValorInvalido",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "criador",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "titulo",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "meta",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "prazo",
+        "type": "uint256"
+      }
+    ],
+    "name": "CampanhaCriada",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "quem",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "valor",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "arrecadado",
+        "type": "uint256"
+      }
+    ],
+    "name": "Contribuiu",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "quem",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "valor",
+        "type": "uint256"
+      }
+    ],
+    "name": "Reembolsado",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "criador",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "valor",
+        "type": "uint256"
+      }
+    ],
+    "name": "Sacada",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "campanha",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "criador",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "titulo",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "meta",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prazo",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "arrecadado",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "apoiadores",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "sacada",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct MiniCrowdfunding.Campanha",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "contribuicoes",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "valor",
+        "type": "uint256"
+      }
+    ],
+    "name": "contribuir",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "titulo",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "meta",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "prazoSegundos",
+        "type": "uint256"
+      }
+    ],
+    "name": "criar",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "faltaParaMeta",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "moeda",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "progressoBps",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "reembolsar",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "valor",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "sacar",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "situacao",
+    "outputs": [
+      {
+        "internalType": "enum MiniCrowdfunding.Situacao",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "todas",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "criador",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "titulo",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "meta",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prazo",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "arrecadado",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "apoiadores",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "sacada",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct MiniCrowdfunding.Campanha[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "total",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const;

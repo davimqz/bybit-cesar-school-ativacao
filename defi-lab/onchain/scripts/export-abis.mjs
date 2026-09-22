@@ -21,6 +21,7 @@ const CONTRATOS = {
   miniOrderBook: "contracts/orderbook/MiniOrderBook.sol/MiniOrderBook.json",
   miniStaking: "contracts/staking/MiniStaking.sol/MiniStaking.json",
   miniEscrow: "contracts/escrow/MiniEscrow.sol/MiniEscrow.json",
+  miniCrowdfunding: "contracts/crowdfunding/MiniCrowdfunding.sol/MiniCrowdfunding.json",
 };
 
 const partes = [

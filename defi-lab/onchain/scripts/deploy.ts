@@ -75,6 +75,11 @@ const LIVRO_COMPRAS: [string, string][] = [
 const STAKING_TAXA_POR_SEGUNDO = parseEther("0.5");
 const STAKING_RESERVA = parseEther("50000");
 
+// Campanha de exemplo do crowdfunding: meta alcancavel pela turma somada
+// (~30 alunos x 100 BRLX), para a pagina nao nascer vazia.
+const CAMPANHA_EXEMPLO_TITULO = "Festa de formatura da turma";
+const CAMPANHA_EXEMPLO_META = parseEther("2000");
+
 // ---------------------------------------------------------------------------
 
 const { viem, networkName } = await network.connect();
@@ -155,6 +160,12 @@ etapa("Publicando escrow...");
 const escrow = await viem.deployContract("MiniEscrow", [brlx.address]);
 console.log(`      escrow ${escrow.address}`);
 
+// --- Crowdfunding -----------------------------------------------------------
+
+etapa("Publicando crowdfunding...");
+const crowdfunding = await viem.deployContract("MiniCrowdfunding", [brlx.address]);
+console.log(`      crowdfunding ${crowdfunding.address}`);
+
 // --- Semeando liquidez ------------------------------------------------------
 
 etapa("Semeando liquidez...");
@@ -200,6 +211,17 @@ console.log(
     ` ${await staking.read.segundosDeReserva()} s de rendimento no ritmo atual`,
 );
 
+// Uma campanha viavel, com prazo longo, para a turma encontrar a pagina cheia.
+// A campanha que FALHA o professor cria ao vivo, com prazo de 5 minutos: um prazo
+// curto gravado no deploy teria vencido dias antes da aula.
+await confirmar(
+  crowdfunding.write.criar([CAMPANHA_EXEMPLO_TITULO, CAMPANHA_EXEMPLO_META, 30n * 86400n]),
+);
+console.log(
+  `      campanha exemplo -> "${CAMPANHA_EXEMPLO_TITULO}",` +
+    ` meta ${formatEther(CAMPANHA_EXEMPLO_META)} BRLX, 30 dias`,
+);
+
 const [melhorBid] = await orderBook.read.melhorCompra();
 const [melhorAsk] = await orderBook.read.melhorVenda();
 const spread = await orderBook.read.spreadBps();
@@ -231,6 +253,7 @@ const deployment = {
     orderBook: orderBook.address,
     staking: staking.address,
     escrow: escrow.address,
+    crowdfunding: crowdfunding.address,
   },
 };
 

@@ -7,6 +7,7 @@ import {
   miniOrderBookAbi,
   miniStakingAbi,
   miniEscrowAbi,
+  miniCrowdfundingAbi,
 } from "./abis";
 
 export const CONTRACTS = {
@@ -18,6 +19,7 @@ export const CONTRACTS = {
   orderBook: deployment.contracts.orderBook as Address,
   staking: deployment.contracts.staking as Address,
   escrow: deployment.contracts.escrow as Address,
+  crowdfunding: deployment.contracts.crowdfunding as Address,
 } as const;
 
 export const PROFESSOR = deployment.professor as Address;
@@ -30,6 +32,7 @@ export const abis = {
   livro: miniOrderBookAbi,
   staking: miniStakingAbi,
   escrow: miniEscrowAbi,
+  crowdfunding: miniCrowdfundingAbi,
 } as const;
 
 /** Os dois pools da aula. `raso` existe para doer. */
@@ -227,4 +230,59 @@ export function fmtRestante(alvo: bigint | undefined, agora: number): string {
   const seg = s % 60;
   if (m >= 60) return `${Math.floor(m / 60)} h ${m % 60} min`;
   return `${m}:${String(seg).padStart(2, "0")}`;
+}
+
+// --- Crowdfunding -----------------------------------------------------------
+
+/** O enum `Situacao` do MiniCrowdfunding. */
+export const SITUACAO = {
+  arrecadando: 0,
+  metaBatida: 1,
+  sacada: 2,
+  falhou: 3,
+} as const;
+
+export type Campanha = {
+  id: bigint;
+  criador: Address;
+  titulo: string;
+  meta: bigint;
+  prazo: bigint;
+  arrecadado: bigint;
+  apoiadores: bigint;
+  sacada: boolean;
+};
+
+export const SITUACOES: Record<
+  number,
+  { rotulo: string; tom: "neutro" | "bom" | "ruim" | "alerta"; explicacao: string }
+> = {
+  [SITUACAO.arrecadando]: {
+    rotulo: "Arrecadando",
+    tom: "neutro",
+    explicacao: "Ainda dentro do prazo e abaixo da meta. O criador não consegue sacar.",
+  },
+  [SITUACAO.metaBatida]: {
+    rotulo: "Meta batida",
+    tom: "bom",
+    explicacao: "O criador já pode sacar tudo. Quem contribuiu não tem mais reembolso.",
+  },
+  [SITUACAO.sacada]: {
+    rotulo: "Sacada",
+    tom: "bom",
+    explicacao: "O dinheiro foi para o criador. Campanha encerrada.",
+  },
+  [SITUACAO.falhou]: {
+    rotulo: "Falhou",
+    tom: "ruim",
+    explicacao: "Prazo vencido sem bater a meta. Cada apoiador saca o que colocou.",
+  },
+};
+
+/** A situação calculada no front, igual ao `situacao()` do contrato. */
+export function situacaoDaCampanha(c: Campanha, agora: number): number {
+  if (c.sacada) return SITUACAO.sacada;
+  if (c.arrecadado >= c.meta) return SITUACAO.metaBatida;
+  if (Number(c.prazo) <= agora) return SITUACAO.falhou;
+  return SITUACAO.arrecadando;
 }

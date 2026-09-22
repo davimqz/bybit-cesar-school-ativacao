@@ -10,7 +10,7 @@ verdade, em rede de teste pública, operados pelos alunos durante a aula.
 
 ```
 defi-lab/
-├── onchain/     contratos (Solidity 0.8.28 + Hardhat 3 + viem) e scripts de operação
+├── onchain/     9 contratos (Solidity 0.8.28 + Hardhat 3 + viem) e scripts de operação
 ├── web/         dApp da aula (Next.js 16 + wagmi 3 + viem)
 └── docs/        roteiro da aula, guia do aluno e checklist do professor
 ```
@@ -25,12 +25,16 @@ defi-lab/
 | `MiniOrderBook` — livro custodiado, prioridade preço-tempo | pronto |
 | `MiniStaking` — emissão por segundo, reserva finita, APR × APY | pronto |
 | `MiniEscrow` — custódia condicional, prazos e árbitro humano | pronto |
+| `MiniCrowdfunding` — tudo-ou-nada com reembolso por pull | pronto |
 | Lab de **pool de liquidez** (swap, LP, slippage, IL, curva ao vivo) | pronto |
 | Lab de **trade** (livro ao vivo, spread, travessia, maker × taker) | pronto |
 | Lab de **staking** (de onde vem o rendimento, diluição, reinvestir) | pronto |
 | Lab de **escrow** (máquina de estados, prazos, risco de oráculo) | pronto |
+| Lab de **crowdfunding** (garantia em código, pull vs push) | pronto |
 | Página de faucet, telão e painel do professor | pronto |
-| Lab de crowdfunding | a construir |
+
+Os cinco labs estão de pé. O que falta é operação: publicar na Sepolia, abastecer
+a turma e subir o front.
 
 ## Começando (ensaio local)
 

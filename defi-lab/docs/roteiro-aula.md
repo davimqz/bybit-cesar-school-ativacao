@@ -1,7 +1,8 @@
-# Roteiro — Labs de Pool, Trade, Staking e Escrow
+# Roteiro — Os cinco labs
 
-Duração: ~87 min (45 do lab de AMM + 15 do livro de ordens + 12 do staking +
-15 do escrow). Com os cinco labs prontos, vira uma aula de 90 min.
+Duração cheia: ~100 min (45 de AMM + 15 de livro de ordens + 12 de staking +
+15 de escrow + 12 de crowdfunding). Para 90 min, corte o crowdfunding ou reduza
+o onboarding — não corte o escrow, que é o fechamento conceitual da aula.
 
 Abra em duas janelas: **`/telao`** no projetor e **`/professor`** na sua tela.
 
@@ -222,7 +223,39 @@ aparece sozinho. O relógio é o único árbitro que não tem interesse próprio
 
 ---
 
-## 8 · Fechamento (2 min)
+## 8 · Quando a promessa é código (12 min) — lab de crowdfunding
+
+O lab mais curto e o mais direto. Abra `/crowdfunding`: a campanha
+&ldquo;Festa de formatura da turma&rdquo; já está lá, semeada no deploy.
+
+**Parte 1 — a garantia.** Peça que a turma contribua até bater a meta. Antes de
+ela encher, mostre que o criador **não tem botão de sacar**:
+
+> "Não é que eu prometi não sacar. É que a função reverte. Qualquer um de vocês
+> podia ter lido esse `if` antes de colocar dinheiro — e essa é a diferença entre
+> confiar numa pessoa e verificar uma regra."
+
+Batida a meta, o botão aparece e o criador saca tudo. Aponte o que mudou para
+quem contribuiu: o reembolso desapareceu junto.
+
+**Parte 2 — o fracasso.** Crie uma campanha ao vivo com **meta alta e prazo de 5
+minutos**. Alguns alunos contribuem. Enquanto o prazo corre, tente o reembolso:
+o contrato recusa, porque a campanha ainda pode dar certo.
+
+Passados os 5 minutos, a situação vira **Falhou** e o botão de reembolso aparece
+para cada apoiador.
+
+> "Repare no que o contrato **não** fez: ele não devolveu para ninguém. Cada um
+> veio buscar. Parece menos gentil, e é mais seguro — se ele tentasse pagar mil
+> pessoas num laço, um único endereço problemático travaria a fila inteira, e o
+> gas não caberia num bloco. Em DeFi, quase todo pagamento é você quem puxa."
+
+Deixe um aluno **sem** sacar de propósito e mostre que o dinheiro dele continua
+no contrato, nominal, esperando.
+
+---
+
+## 9 · Fechamento (2 min)
 
 Volte à home e mostre a lista de contratos, cada um linkado no Etherscan.
 

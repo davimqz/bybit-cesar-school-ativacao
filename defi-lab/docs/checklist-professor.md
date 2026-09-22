@@ -30,8 +30,8 @@ npm test                       # a suíte tem que passar inteira
 npm run deploy:sepolia
 ```
 
-- [ ] Contratos publicados (são **oito**: CSR, BRLX, GasFaucet, dois pools, o livro,
-      o cofre e o escrow)
+- [ ] Contratos publicados (são **nove**: CSR, BRLX, GasFaucet, dois pools, o livro,
+      o cofre, o escrow e o crowdfunding)
 - [ ] `npx hardhat verify` rodado em **todos** eles — os alunos vão ler o código
 - [ ] Livro de ordens semeado — o deploy faz sozinho; confirme em `/trade` que o
       spread aparece e que existem seis ordens vivas
@@ -39,6 +39,9 @@ npm run deploy:sepolia
       confirme em `/staking` que "dura mais" passa da duração da aula
 - [ ] Escrow: o lab não precisa de semeadura, mas **você é o árbitro de todos os
       acordos**. Deixe `/professor` aberto na seção de disputas durante o lab
+- [ ] Crowdfunding: o deploy cria a campanha de exemplo (meta 2.000 BRLX, 30
+      dias). A campanha que **falha** você cria ao vivo, com prazo de 5 min —
+      prazo curto gravado no deploy venceria dias antes da aula
 - [ ] `web/src/lib/deployment.json` atualizado (o deploy faz sozinho)
 - [ ] Front publicado (Vercel) e testado no celular, **no 4G, não no Wi-Fi**
 - [ ] CSR e BRLX adicionados na sua própria MetaMask
@@ -82,6 +85,8 @@ npm run deploy:sepolia
 | `EstadoErrado` | O acordo do escrow saiu do estado que a ação exigia — alguém agiu antes |
 | `PrazoAindaNaoVenceu` | A contagem regressiva do escrow não chegou a zero |
 | `NaoEhOArbitro` | Um aluno tentou resolver a própria disputa. Funcionou como deveria |
+| `MetaNaoBatida` | O criador tentou sacar antes da meta. É a garantia funcionando |
+| `AindaPodeBaterAMeta` | Pediu reembolso com a campanha em pé — só depois do prazo |
 
 ## Parâmetros que você pode querer mexer
 
@@ -95,6 +100,8 @@ Em `onchain/scripts/deploy.ts`:
   existe para pagar. Hoje: 0,5 CSR/s com 50.000 de reserva, ou seja ~28 h de
   rendimento. Baixar a emissão deixa o APR "realista" e o rendimento **invisível**
   em 12 minutos de lab — o número absurdo é proposital e está explicado na tela.
+- `CAMPANHA_EXEMPLO_*` — título e meta da campanha semeada. A meta deve ser
+  alcançável pela turma somada (hoje 2.000 BRLX, ~20 alunos × 100)
 - `LIVRO_VENDAS` / `LIVRO_COMPRAS` — a escada inicial do livro. Cuidado: o spread
   do topo (**50 bps**) foi escolhido contra a taxa do pool (30 bps) para que o
   livro ganhe na ordem pequena e perca na grande. Alargou o spread? O pool passa

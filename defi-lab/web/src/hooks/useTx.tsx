@@ -121,6 +121,29 @@ function traduzirErro(erro: Error): string {
     return "Comprador, vendedor e árbitro têm que ser endereços diferentes.";
   }
 
+  // --- Crowdfunding ---
+  if (/MetaNaoBatida/i.test(bruto)) {
+    return "A meta não foi batida: o contrato não entrega o dinheiro ao criador. É a garantia do tudo-ou-nada funcionando.";
+  }
+  if (/MetaFoiBatida/i.test(bruto)) {
+    return "A meta foi batida, então não há reembolso — o valor agora é do projeto.";
+  }
+  if (/AindaPodeBaterAMeta/i.test(bruto)) {
+    return "O prazo não venceu: enquanto a campanha pode dar certo, ninguém retira a contribuição.";
+  }
+  if (/PrazoEncerrado/i.test(bruto)) {
+    return "A arrecadação desta campanha já fechou.";
+  }
+  if (/NadaParaReembolsar/i.test(bruto)) {
+    return "Você não tem contribuição nesta campanha (ou já sacou o reembolso).";
+  }
+  if (/NaoEhOCriador/i.test(bruto)) {
+    return "Só quem criou a campanha pode sacar.";
+  }
+  if (/JaFoiSacada/i.test(bruto)) {
+    return "Esta campanha já foi sacada e está encerrada.";
+  }
+
   return bruto;
 }
 

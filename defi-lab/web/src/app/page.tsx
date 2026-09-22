@@ -28,7 +28,12 @@ const LABS = [
     conceito: "custódia condicional e risco de oráculo",
     pronto: true,
   },
-  { href: "/crowdfunding", titulo: "Crowdfunding", conceito: "arrecadação tudo-ou-nada", pronto: false },
+  {
+    href: "/crowdfunding",
+    titulo: "Crowdfunding",
+    conceito: "arrecadação tudo-ou-nada e reembolso por pull",
+    pronto: true,
+  },
 ];
 
 const PASSOS = [
@@ -36,7 +41,7 @@ const PASSOS = [
   "Nas configurações da MetaMask, ative “Mostrar redes de teste”.",
   "Conecte a carteira aqui em cima e troque para a rede Sepolia.",
   "Pegue gas e tokens no Faucet.",
-  "Entre nos labs: Pool de liquidez, Trade, Staking e Escrow.",
+  "Entre nos labs — são cinco, e a home lista todos.",
 ];
 
 export default function Home() {
