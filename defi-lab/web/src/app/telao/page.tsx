@@ -3,7 +3,17 @@
 import { useCallback, useState } from "react";
 import { useWatchContractEvent, useReadContract } from "wagmi";
 import { formatUnits, type Address } from "viem";
-import { POOLS, CONTRACTS, abis, fmt, encurtar, tokenPorEndereco } from "@/lib/contracts";
+import {
+  POOLS,
+  CONTRACTS,
+  LADO,
+  abis,
+  fmt,
+  fmtBps,
+  fmtPreco,
+  encurtar,
+  tokenPorEndereco,
+} from "@/lib/contracts";
 
 /**
  * Tela do projetor. Mostra o que a turma está fazendo, ao vivo.
@@ -14,7 +24,7 @@ import { POOLS, CONTRACTS, abis, fmt, encurtar, tokenPorEndereco } from "@/lib/c
 
 type Evento = {
   id: string;
-  tipo: "swap" | "entrou" | "saiu";
+  tipo: "swap" | "entrou" | "saiu" | "ordem" | "negocio";
   quem: Address;
   texto: string;
 };
@@ -34,8 +44,10 @@ export default function TelaoPage() {
       {POOLS.map((pool) => (
         <ObservadorDePool key={pool.key} pool={pool} onEvento={registrar} />
       ))}
+      <ObservadorDoLivro onEvento={registrar} />
 
       <Placar />
+      <PlacarDoLivro />
 
       <div className="rounded-2xl border border-slate-200 bg-white">
         {eventos.length === 0 ? (
@@ -48,11 +60,13 @@ export default function TelaoPage() {
               <li key={e.id} className="flex items-baseline gap-4 px-6 py-4">
                 <span
                   className={`h-2 w-2 shrink-0 self-center rounded-full ${
-                    e.tipo === "swap"
-                      ? "bg-slate-900"
-                      : e.tipo === "entrou"
-                        ? "bg-emerald-500"
-                        : "bg-rose-500"
+                    {
+                      swap: "bg-slate-900",
+                      entrou: "bg-emerald-500",
+                      saiu: "bg-rose-500",
+                      ordem: "bg-sky-500",
+                      negocio: "bg-amber-500",
+                    }[e.tipo]
                   }`}
                 />
                 <span className="font-mono text-lg text-slate-500">{encurtar(e.quem)}</span>
@@ -132,6 +146,92 @@ function ObservadorDePool({
   });
 
   return null;
+}
+
+/**
+ * O livro é o lado "humano" do telão: cada linha aqui é alguém oferecendo ou
+ * alguém aceitando. Vale contrastar com os eventos do pool, que nunca dizem
+ * "de quem" veio o preço.
+ */
+function ObservadorDoLivro({ onEvento }: { onEvento: (e: Evento) => void }) {
+  const base = { address: CONTRACTS.orderBook, abi: abis.livro } as const;
+
+  useWatchContractEvent({
+    ...base,
+    eventName: "OrdemColocada",
+    onLogs: (logs) => {
+      for (const log of logs) {
+        const a = log.args;
+        if (!a.dono) continue;
+        const vendendo = Number(a.lado) === LADO.venda;
+        onEvento({
+          id: `${log.transactionHash}-${log.logIndex}`,
+          tipo: "ordem",
+          quem: a.dono,
+          texto: `ofereceu ${vendendo ? "venda" : "compra"} de ${fmt(a.quantidade, 0)} CSR a ${fmtPreco(a.preco)} · livro`,
+        });
+      }
+    },
+  });
+
+  useWatchContractEvent({
+    ...base,
+    eventName: "OrdemExecutada",
+    onLogs: (logs) => {
+      for (const log of logs) {
+        const a = log.args;
+        if (!a.taker) continue;
+        const makerVendia = Number(a.ladoDoMaker) === LADO.venda;
+        onEvento({
+          id: `${log.transactionHash}-${log.logIndex}`,
+          tipo: "negocio",
+          quem: a.taker,
+          texto: `${makerVendia ? "comprou" : "vendeu"} ${fmt(a.quantidade, 0)} CSR a ${fmtPreco(a.preco)} de ${encurtar(a.maker)} · livro`,
+        });
+      }
+    },
+  });
+
+  useWatchContractEvent({
+    ...base,
+    eventName: "OrdemCancelada",
+    onLogs: (logs) => {
+      for (const log of logs) {
+        const a = log.args;
+        if (!a.dono) continue;
+        onEvento({
+          id: `${log.transactionHash}-${log.logIndex}`,
+          tipo: "saiu",
+          quem: a.dono,
+          texto: `tirou ${fmt(a.quantidadeDevolvida, 0)} CSR do livro · livro`,
+        });
+      }
+    },
+  });
+
+  return null;
+}
+
+function PlacarDoLivro() {
+  const base = { address: CONTRACTS.orderBook, abi: abis.livro } as const;
+  const opcoes = { query: { refetchInterval: 3000 } } as const;
+
+  const { data: bid } = useReadContract({ ...base, functionName: "melhorCompra", ...opcoes });
+  const { data: ask } = useReadContract({ ...base, functionName: "melhorVenda", ...opcoes });
+  const { data: spread } = useReadContract({ ...base, functionName: "spreadBps", ...opcoes });
+  const { data: vivas } = useReadContract({ ...base, functionName: "ordensVivas", ...opcoes });
+
+  const b = bid as readonly [bigint, bigint] | undefined;
+  const a = ask as readonly [bigint, bigint] | undefined;
+
+  return (
+    <dl className="grid gap-6 rounded-2xl border border-slate-200 bg-white p-8 sm:grid-cols-4">
+      <Numerao rotulo="Livro · bid" valor={fmtPreco(b?.[0])} sufixo="BRLX" />
+      <Numerao rotulo="Livro · ask" valor={fmtPreco(a?.[0])} sufixo="BRLX" />
+      <Numerao rotulo="Spread" valor={fmtBps(spread as bigint | undefined)} dica="quem fica no meio, ganha" />
+      <Numerao rotulo="Ordens vivas" valor={vivas !== undefined ? String(vivas) : "—"} />
+    </dl>
+  );
 }
 
 function Placar() {

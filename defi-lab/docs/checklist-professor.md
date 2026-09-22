@@ -30,8 +30,10 @@ npm test                       # a suíte tem que passar inteira
 npm run deploy:sepolia
 ```
 
-- [ ] Contratos publicados
+- [ ] Contratos publicados (são **seis**: CSR, BRLX, GasFaucet, dois pools e o livro)
 - [ ] `npx hardhat verify` rodado em **todos** eles — os alunos vão ler o código
+- [ ] Livro de ordens semeado — o deploy faz sozinho; confirme em `/trade` que o
+      spread aparece e que existem seis ordens vivas
 - [ ] `web/src/lib/deployment.json` atualizado (o deploy faz sozinho)
 - [ ] Front publicado (Vercel) e testado no celular, **no 4G, não no Wi-Fi**
 - [ ] CSR e BRLX adicionados na sua própria MetaMask
@@ -66,6 +68,10 @@ npm run deploy:sepolia
 | `FaucetCooldownActive` | Sacou há menos de 1 min (tokens) ou 5 min (gas) |
 | `FaucetEmpty` | O `GasFaucet` secou. Mande ETH para o endereço dele. |
 | `OwnableUnauthorizedAccount` | Um aluno achou o `/professor`. Funcionou como deveria. |
+| `OrdemNaoEstaViva` | Alguém executou aquela ordem primeiro. É a aula do livro, não um bug |
+| `PrecoPiorQueOLimite` | A travessia do livro passou da tolerância — o livro mudou entre a simulação e o bloco |
+| `LivroSemLiquidez` | O lado do livro está vazio. Recoloque ordens em `/trade` |
+| `AutoNegociacao` | O aluno tentou executar a própria ordem. O contrato recusa de propósito |
 
 ## Parâmetros que você pode querer mexer
 
@@ -75,5 +81,10 @@ Em `onchain/scripts/deploy.ts`:
 - `GAS_DRIP` — 0,01 ETH dá umas 40 transações em Sepolia
 - `POOL_FUNDO_*` / `POOL_RASO_*` — o contraste de slippage entre os dois pools
   (hoje: **49 bps contra 1687 bps** no mesmo swap de 100 CSR)
+- `LIVRO_VENDAS` / `LIVRO_COMPRAS` — a escada inicial do livro. Cuidado: o spread
+  do topo (**50 bps**) foi escolhido contra a taxa do pool (30 bps) para que o
+  livro ganhe na ordem pequena e perca na grande. Alargou o spread? O pool passa
+  a ganhar nos dois casos e a conclusão da aula muda. Confira o cartão **Mesma
+  venda, dois mercados** depois de mexer.
 
 Mexeu nos contratos? `npm run build && npm run export-abis` antes de subir o front.

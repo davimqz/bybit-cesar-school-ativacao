@@ -22,9 +22,11 @@ defi-lab/
 | `ClassroomToken` — ERC-20 com faucet (publicado 2×: CSR e BRLX) | pronto |
 | `GasFaucet` — distribui ETH de testnet para a turma | pronto |
 | `MiniAMM` — pool `x·y=k`, taxa 0,3%, shares de LP | pronto |
+| `MiniOrderBook` — livro custodiado, prioridade preço-tempo | pronto |
 | Lab de **pool de liquidez** (swap, LP, slippage, IL, curva ao vivo) | pronto |
+| Lab de **trade** (livro ao vivo, spread, travessia, maker × taker) | pronto |
 | Página de faucet, telão e painel do professor | pronto |
-| Labs de trade (order book), staking, escrow e crowdfunding | a construir |
+| Labs de staking, escrow e crowdfunding | a construir |
 
 ## Começando (ensaio local)
 
@@ -69,7 +71,9 @@ cd onchain && npm test
 ```
 
 Os testes são material didático: cada `it` verifica um conceito do slide
-(`x·y=k`, slippage, taxas de LP, impermanent loss). Vale projetar a saída.
+(`x·y=k`, slippage, taxas de LP, impermanent loss, spread, prioridade
+preço-tempo). Vale projetar a saída — o último bloco imprime o mesmo trade
+executado no livro e no pool, lado a lado.
 
 ## Comandos
 

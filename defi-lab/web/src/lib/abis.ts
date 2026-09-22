@@ -1784,3 +1784,701 @@ export const gasFaucetAbi = [
     "type": "receive"
   }
 ] as const;
+
+export const miniOrderBookAbi = [
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "base_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "quote_",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "AutoNegociacao",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "limite",
+        "type": "uint256"
+      }
+    ],
+    "name": "LivroCheio",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "LivroSemLiquidez",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "NaoEhDonoDaOrdem",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrdemInexistente",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrdemNaoEstaViva",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "PrecoInvalido",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "efetivo",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limite",
+        "type": "uint256"
+      }
+    ],
+    "name": "PrecoPiorQueOLimite",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "QuantidadeInvalida",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TokensIguais",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddress",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "dono",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quantidadeDevolvida",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrdemCancelada",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "dono",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum MiniOrderBook.Lado",
+        "name": "lado",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "preco",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quantidade",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrdemColocada",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "maker",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "taker",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum MiniOrderBook.Lado",
+        "name": "ladoDoMaker",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "preco",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quantidade",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrdemExecutada",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_EXECUCOES",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_ORDENS_VIVAS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "base",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "cancelar",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum MiniOrderBook.Lado",
+        "name": "lado",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "preco",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quantidade",
+        "type": "uint256"
+      }
+    ],
+    "name": "colocar",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quantidade",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "custoMaximo",
+        "type": "uint256"
+      }
+    ],
+    "name": "comprarAMercado",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "gasto",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "comprado",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quantidade",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "preco",
+        "type": "uint256"
+      }
+    ],
+    "name": "custo",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quantidade",
+        "type": "uint256"
+      }
+    ],
+    "name": "executar",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "livro",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "dono",
+            "type": "address"
+          },
+          {
+            "internalType": "enum MiniOrderBook.Lado",
+            "name": "lado",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "preco",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "quantidade",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "custodiaQuote",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "viva",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct MiniOrderBook.Ordem[]",
+        "name": "vivas",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "melhorCompra",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "preco",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quantidade",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "melhorVenda",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "preco",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quantidade",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "ordem",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "dono",
+            "type": "address"
+          },
+          {
+            "internalType": "enum MiniOrderBook.Lado",
+            "name": "lado",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "preco",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "quantidade",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "custodiaQuote",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "viva",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct MiniOrderBook.Ordem",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "dono",
+        "type": "address"
+      }
+    ],
+    "name": "ordensDe",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "ids",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ordensVivas",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "quote",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quantidade",
+        "type": "uint256"
+      }
+    ],
+    "name": "simularCompra",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "custoTotal",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "preenchido",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "precoMedio",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "slippageBps",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quantidade",
+        "type": "uint256"
+      }
+    ],
+    "name": "simularVenda",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "totalRecebido",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "preenchido",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "precoMedio",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "slippageBps",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "spreadBps",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalDeOrdens",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quantidade",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "recebimentoMinimo",
+        "type": "uint256"
+      }
+    ],
+    "name": "venderAMercado",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "recebido",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "vendido",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+] as const;

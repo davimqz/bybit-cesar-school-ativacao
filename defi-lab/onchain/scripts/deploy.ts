@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /**
- * Publica a infraestrutura da aula e ja deixa os pools semeados.
+ * Publica a infraestrutura da aula e ja deixa os pools e o livro semeados.
  *
  *   npm run deploy:local     (ensaio)
  *   npm run deploy:sepolia   (D-2, a valer)
@@ -36,6 +36,30 @@ const POOL_FUNDO_BRLX = parseEther("100000");
 const POOL_RASO_CSR = parseEther("500");
 const POOL_RASO_BRLX = parseEther("1000");
 
+/**
+ * Escada inicial do livro de ordens, colocada pelo professor.
+ *
+ * Livro vazio nao ensina nada: a turma precisa VER os degraus antes de
+ * atravessa-los.
+ *
+ * O spread do topo (50 bps) foi escolhido contra a taxa do pool (30 bps), e a
+ * comparacao nao e academica: enquanto o livro tem profundidade, ele entrega um
+ * preco melhor que a curva; passando dos ~900 CSR ofertados, ele simplesmente
+ * nao consegue executar, e o pool executa. Sao as duas licoes de uma vez, e as
+ * duas aparecem na tela sozinhas. Mexer nestes numeros muda a conclusao da
+ * aula — se mexer, confira o cartao "Mesma venda, dois mercados" antes.
+ */
+const LIVRO_VENDAS: [string, string][] = [
+  ["2.005", "200"],
+  ["2.02", "300"],
+  ["2.05", "400"],
+];
+const LIVRO_COMPRAS: [string, string][] = [
+  ["1.995", "200"],
+  ["1.98", "300"],
+  ["1.95", "400"],
+];
+
 // ---------------------------------------------------------------------------
 
 const { viem, networkName } = await network.connect();
@@ -56,7 +80,7 @@ if (saldo === 0n) {
 
 // --- Tokens -----------------------------------------------------------------
 
-console.log("[1/5] Publicando tokens...");
+console.log("[1/6] Publicando tokens...");
 const csr = await viem.deployContract("ClassroomToken", [
   "CESAR Coin", "CSR", SUPPLY_INICIAL, FAUCET_TOKENS, FAUCET_COOLDOWN, professor.account.address,
 ]);
@@ -69,7 +93,7 @@ console.log(`      BRLX  ${brlx.address}`);
 
 // --- Faucet de gas ----------------------------------------------------------
 
-console.log("[2/5] Publicando GasFaucet...");
+console.log("[2/6] Publicando GasFaucet...");
 const gasFaucet = await viem.deployContract(
   "GasFaucet",
   [GAS_DRIP, GAS_COOLDOWN, professor.account.address],
@@ -79,7 +103,7 @@ console.log(`      GasFaucet ${gasFaucet.address} (${GAS_FAUCET_SEED} ETH)`);
 
 // --- Pools ------------------------------------------------------------------
 
-console.log("[3/5] Publicando pools...");
+console.log("[3/6] Publicando pools...");
 const poolFundo = await viem.deployContract("MiniAMM", [
   csr.address, brlx.address, "CESAR LP CSR/BRLX", "CLP",
 ]);
@@ -89,9 +113,15 @@ const poolRaso = await viem.deployContract("MiniAMM", [
 console.log(`      fundo ${poolFundo.address}`);
 console.log(`      raso  ${poolRaso.address}`);
 
+// --- Livro de ordens --------------------------------------------------------
+
+console.log("[4/6] Publicando livro de ordens...");
+const orderBook = await viem.deployContract("MiniOrderBook", [csr.address, brlx.address]);
+console.log(`      livro ${orderBook.address}`);
+
 // --- Semeando liquidez ------------------------------------------------------
 
-console.log("[4/5] Semeando liquidez...");
+console.log("[5/6] Semeando liquidez...");
 
 // Uma transacao por vez, esperando o recibo. `contract.write.*` devolve o hash
 // sem confirmar: em rede real, a transacao seguinte pede o nonce antes de a rede
@@ -115,9 +145,29 @@ const slipFundo = await poolFundo.read.previewSwap([csr.address, parseEther("100
 const slipRaso = await poolRaso.read.previewSwap([csr.address, parseEther("100")]);
 console.log(`      swap de 100 CSR -> slippage ${slipFundo[2]} bps (fundo) / ${slipRaso[2]} bps (raso)`);
 
+// O livro precisa das duas aprovacoes: vende CSR de um lado, paga BRLX do outro.
+await confirmar(csr.write.approve([orderBook.address, SUPPLY_INICIAL]));
+await confirmar(brlx.write.approve([orderBook.address, SUPPLY_INICIAL]));
+
+// LADO: 0 = Compra, 1 = Venda (o enum do contrato).
+for (const [preco, quantidade] of LIVRO_VENDAS) {
+  await confirmar(orderBook.write.colocar([1, parseEther(preco), parseEther(quantidade)]));
+}
+for (const [preco, quantidade] of LIVRO_COMPRAS) {
+  await confirmar(orderBook.write.colocar([0, parseEther(preco), parseEther(quantidade)]));
+}
+
+const [melhorBid] = await orderBook.read.melhorCompra();
+const [melhorAsk] = await orderBook.read.melhorVenda();
+const spread = await orderBook.read.spreadBps();
+console.log(
+  `      livro semeado -> bid ${formatEther(melhorBid)} / ask ${formatEther(melhorAsk)}` +
+    ` (spread ${spread} bps, ${await orderBook.read.ordensVivas()} ordens)`,
+);
+
 // --- Gravando enderecos -----------------------------------------------------
 
-console.log("[5/5] Gravando enderecos...");
+console.log("[6/6] Gravando enderecos...");
 
 // Bloco a partir do qual o front procura eventos. Sem isto, o telao e o
 // painel de impermanent loss varreriam a chain inteira a cada refresh.
@@ -135,6 +185,7 @@ const deployment = {
     gasFaucet: gasFaucet.address,
     poolFundo: poolFundo.address,
     poolRaso: poolRaso.address,
+    orderBook: orderBook.address,
   },
 };
 

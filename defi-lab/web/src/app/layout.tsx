@@ -13,6 +13,7 @@ const NAV = [
   { href: "/", rotulo: "Início" },
   { href: "/faucet", rotulo: "Faucet" },
   { href: "/pool", rotulo: "Pool de liquidez" },
+  { href: "/trade", rotulo: "Trade" },
   { href: "/telao", rotulo: "Telão" },
 ];
 

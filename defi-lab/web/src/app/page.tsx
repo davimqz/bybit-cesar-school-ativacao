@@ -10,7 +10,12 @@ const LABS = [
     conceito: "x · y = k, slippage, taxas e impermanent loss",
     pronto: true,
   },
-  { href: "/trade", titulo: "Trade (order book)", conceito: "o outro jeito de formar preço", pronto: false },
+  {
+    href: "/trade",
+    titulo: "Trade (order book)",
+    conceito: "spread, profundidade e prioridade preço-tempo",
+    pronto: true,
+  },
   { href: "/staking", titulo: "Staking", conceito: "APR × APY e de onde vem o rendimento", pronto: false },
   { href: "/escrow", titulo: "Escrow", conceito: "custódia condicional e risco de oráculo", pronto: false },
   { href: "/crowdfunding", titulo: "Crowdfunding", conceito: "arrecadação tudo-ou-nada", pronto: false },
@@ -21,7 +26,7 @@ const PASSOS = [
   "Nas configurações da MetaMask, ative “Mostrar redes de teste”.",
   "Conecte a carteira aqui em cima e troque para a rede Sepolia.",
   "Pegue gas e tokens no Faucet.",
-  "Entre no lab de Pool de liquidez.",
+  "Entre nos labs: Pool de liquidez e Trade.",
 ];
 
 export default function Home() {

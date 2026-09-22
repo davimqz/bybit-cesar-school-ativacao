@@ -1,14 +1,15 @@
 {
-  "chainId": 11155111,
-  "network": "sepolia",
-  "deployedAt": "2026-09-21T19:53:39.587Z",
-  "deployBlock": "11753061",
-  "professor": "0x1bc27feb21f516f882e29ecf2e8ba8be3c971521",
+  "chainId": 31337,
+  "network": "localhost",
+  "deployedAt": "2026-09-22T00:27:45.496Z",
+  "deployBlock": "69",
+  "professor": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
   "contracts": {
-    "csr": "0x304cff558e91cd99e12536ecc2edc12fffc8adf7",
-    "brlx": "0x3d1830625061c3b1c796ba83ddd1c36d04a96444",
-    "gasFaucet": "0x6f23f6fd5a9d06eb4d1edbeb9680825c2875a7b2",
-    "poolFundo": "0x9356e145fcaeda45c0c556a6a80733a9c283991d",
-    "poolRaso": "0xbecbd95e126fa7fe9750fce48adfbedb9ca5a56c"
+    "csr": "0x4c5859f0f772848b2d91f1d83e2fe57935348029",
+    "brlx": "0x1291be112d480055dafd8a610b7d1e203891c274",
+    "gasFaucet": "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154",
+    "poolFundo": "0xb7278a61aa25c888815afc32ad3cc52ff24fe575",
+    "poolRaso": "0xcd8a1c3ba11cf5ecfa6267617243239504a98d90",
+    "orderBook": "0x82e01223d51eb87e16a03e24687edf0f294da6f1"
   }
 }

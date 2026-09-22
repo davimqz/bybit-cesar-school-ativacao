@@ -69,6 +69,27 @@ function traduzirErro(erro: Error): string {
   if (/FaucetEmpty/i.test(bruto)) {
     return "O faucet ficou sem saldo. Avise o professor.";
   }
+
+  // --- Livro de ordens ---
+  if (/PrecoPiorQueOLimite/i.test(bruto)) {
+    return "A travessia do livro passou do seu limite: alguém comeu os melhores níveis antes de você. Aumente a tolerância ou reduza a ordem.";
+  }
+  if (/OrdemNaoEstaViva/i.test(bruto)) {
+    return "Essa ordem não existe mais — outra pessoa executou ela primeiro. No livro, quem chega antes leva.";
+  }
+  if (/LivroSemLiquidez/i.test(bruto)) {
+    return "Não há ordens desse lado do livro. Alguém precisa oferecer antes de alguém poder tomar.";
+  }
+  if (/AutoNegociacao/i.test(bruto)) {
+    return "Você não pode executar a sua própria ordem. Para desfazê-la, use Cancelar.";
+  }
+  if (/NaoEhDonoDaOrdem/i.test(bruto)) {
+    return "Essa ordem não é sua: só quem colocou pode cancelar.";
+  }
+  if (/LivroCheio/i.test(bruto)) {
+    return "O livro está cheio. Cancele uma ordem sua ou espere o mercado girar.";
+  }
+
   return bruto;
 }
 

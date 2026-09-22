@@ -18,6 +18,7 @@ const CONTRATOS = {
   classroomToken: "contracts/tokens/ClassroomToken.sol/ClassroomToken.json",
   miniAmm: "contracts/amm/MiniAMM.sol/MiniAMM.json",
   gasFaucet: "contracts/utils/GasFaucet.sol/GasFaucet.json",
+  miniOrderBook: "contracts/orderbook/MiniOrderBook.sol/MiniOrderBook.json",
 };
 
 const partes = [

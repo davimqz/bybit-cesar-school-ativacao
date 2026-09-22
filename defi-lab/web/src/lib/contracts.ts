@@ -1,6 +1,6 @@
 import { formatUnits, type Address } from "viem";
 import deployment from "./deployment.json";
-import { classroomTokenAbi, miniAmmAbi, gasFaucetAbi } from "./abis";
+import { classroomTokenAbi, miniAmmAbi, gasFaucetAbi, miniOrderBookAbi } from "./abis";
 
 export const CONTRACTS = {
   csr: deployment.contracts.csr as Address,
@@ -8,6 +8,7 @@ export const CONTRACTS = {
   gasFaucet: deployment.contracts.gasFaucet as Address,
   poolFundo: deployment.contracts.poolFundo as Address,
   poolRaso: deployment.contracts.poolRaso as Address,
+  orderBook: deployment.contracts.orderBook as Address,
 } as const;
 
 export const PROFESSOR = deployment.professor as Address;
@@ -17,6 +18,7 @@ export const abis = {
   token: classroomTokenAbi,
   pool: miniAmmAbi,
   gasFaucet: gasFaucetAbi,
+  livro: miniOrderBookAbi,
 } as const;
 
 /** Os dois pools da aula. `raso` existe para doer. */
@@ -80,4 +82,35 @@ export const EXPLORER_BASE =
 export function linkExplorer(tipo: "address" | "tx", valor: string): string | undefined {
   if (!EXPLORER_BASE) return undefined;
   return `${EXPLORER_BASE}/${tipo}/${valor}`;
+}
+
+// --- Livro de ordens --------------------------------------------------------
+
+/** O enum `Lado` do MiniOrderBook. */
+export const LADO = { compra: 0, venda: 1 } as const;
+export type Lado = (typeof LADO)[keyof typeof LADO];
+
+/** Uma ordem como o contrato devolve. */
+export type Ordem = {
+  id: bigint;
+  dono: Address;
+  lado: number;
+  preco: bigint;
+  quantidade: bigint;
+  custodiaQuote: bigint;
+  viva: boolean;
+};
+
+/**
+ * Preco por CSR, formatado para a tela.
+ *
+ * Duas casas somem o degrau do livro (2,02 e 2,05 viram o mesmo numero),
+ * entao aqui sao quatro — e a diferenca entre niveis que a aula discute.
+ */
+export function fmtPreco(preco: bigint | undefined): string {
+  if (preco === undefined) return "—";
+  return Number(formatUnits(preco, 18)).toLocaleString("pt-BR", {
+    minimumFractionDigits: 4,
+    maximumFractionDigits: 4,
+  });
 }

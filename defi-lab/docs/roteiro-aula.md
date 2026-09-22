@@ -1,7 +1,7 @@
-# Roteiro — Lab de Pool de Liquidez
+# Roteiro — Labs de Pool de Liquidez e Trade
 
-Duração: ~45 min para o lab de AMM. (Com os cinco labs prontos, vira uma aula
-de 90 min — ver o escopo geral.)
+Duração: ~60 min (45 do lab de AMM + 15 do lab de livro de ordens). Com os
+cinco labs prontos, vira uma aula de 90 min — ver o escopo geral.
 
 Abra em duas janelas: **`/telao`** no projetor e **`/professor`** na sua tela.
 
@@ -103,7 +103,51 @@ mesma cesta que entrou.
 
 ---
 
-## 5 · Fechamento (2 min)
+## 5 · O outro jeito de formar preço (15 min) — lab de trade
+
+Abra `/trade`. O livro já está semeado: spread de 50 bps em volta de 1 CSR = 2 BRLX.
+
+Comece pelo cartão **Mesma venda, dois mercados**, que também roda sem ninguém
+assinar nada.
+
+> "Vender 100 CSR rende mais no livro. Vender 1.200 CSR o livro nem consegue
+> executar inteiro. Não existe 'o melhor mercado' — existe o melhor mercado para
+> o tamanho da sua ordem."
+
+**Sequência na tela:**
+
+1. **Leia o livro.** Cada linha é uma pessoa, e o endereço está ali. Compare com
+   o pool, onde não há de quem: só reservas.
+2. **Clique numa linha** e execute contra ela. O preço é exato, sem tolerância —
+   e alguém vai reclamar que a ordem "desapareceu" antes de assinar. É a aula:
+   no livro, quem chega primeiro leva.
+3. **Todos colocam uma ordem limitada** dentro do spread. O livro da turma
+   aparece na tela de todo mundo, e o spread fecha na frente deles.
+4. **Ordem a mercado** de 600 CSR: a travessia come três níveis e o preço médio
+   piora em degraus.
+
+> "No pool você escorrega por uma curva. Aqui você come a escada que outras
+> pessoas construíram, um degrau por vez. Os dois cobram de você por tamanho —
+> mas só um deles tem alguém do outro lado que escolheu aquele preço."
+
+**O momento maker × taker:** pergunte quem, das ordens colocadas no passo 3,
+foi executada — e a que preço.
+
+> "Quem colocou a ordem não pagou slippage nenhum: o preço era dele. Em troca,
+> não escolheu o momento de vender. É essa a troca de quem faz mercado, e é de
+> onde sai o spread."
+
+**Se o livro esvaziar:** `/professor` → cartão **Livro de ordens** mostra quantas
+ordens restam. Abaixo de quatro, recoloque uma escada em `/trade` — você tem 10
+milhões de cada token.
+
+**O gesto dramático (opcional, se sobrar tempo):** `/professor` → **Varrer o
+lado da venda**. As linhas desaparecem uma a uma e o spread explode no telão.
+É o gêmeo do whale swap, no outro mercado.
+
+---
+
+## 6 · Fechamento (2 min)
 
 Volte à home e mostre a lista de contratos, cada um linkado no Etherscan.
 
@@ -121,4 +165,5 @@ Volte à home e mostre a lista de contratos, cada um linkado no Etherscan.
 | Sepolia fora do ar | `npm run node` + `npm run deploy:localhost`, front apontando para local (perde o Etherscan) |
 | Wi-Fi da sala caiu | Vídeo do ensaio — grave na véspera, custa 10 minutos |
 | `GasFaucet` secou no meio | Mande ETH direto para o endereço do faucet; o saldo atualiza na hora |
+| Livro de ordens zerado | `/trade` com a sua carteira: três ordens de cada lado em volta de 2,00 devolvem o lab |
 | Aluno com carteira travada | Ele acompanha em dupla; a tela do `/telao` mantém todo mundo no mesmo assunto |
