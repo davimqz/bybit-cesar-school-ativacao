@@ -1,6 +1,12 @@
 import { formatUnits, type Address } from "viem";
 import deployment from "./deployment.json";
-import { classroomTokenAbi, miniAmmAbi, gasFaucetAbi, miniOrderBookAbi } from "./abis";
+import {
+  classroomTokenAbi,
+  miniAmmAbi,
+  gasFaucetAbi,
+  miniOrderBookAbi,
+  miniStakingAbi,
+} from "./abis";
 
 export const CONTRACTS = {
   csr: deployment.contracts.csr as Address,
@@ -9,6 +15,7 @@ export const CONTRACTS = {
   poolFundo: deployment.contracts.poolFundo as Address,
   poolRaso: deployment.contracts.poolRaso as Address,
   orderBook: deployment.contracts.orderBook as Address,
+  staking: deployment.contracts.staking as Address,
 } as const;
 
 export const PROFESSOR = deployment.professor as Address;
@@ -19,6 +26,7 @@ export const abis = {
   pool: miniAmmAbi,
   gasFaucet: gasFaucetAbi,
   livro: miniOrderBookAbi,
+  staking: miniStakingAbi,
 } as const;
 
 /** Os dois pools da aula. `raso` existe para doer. */
@@ -113,4 +121,41 @@ export function fmtPreco(preco: bigint | undefined): string {
     minimumFractionDigits: 4,
     maximumFractionDigits: 4,
   });
+}
+
+// --- Staking ----------------------------------------------------------------
+
+/**
+ * APR -> APY, com capitalizacao a cada `periodos` no ano.
+ *
+ * O contrato so sabe o APR: ele emite de forma linear. O APY e uma projecao de
+ * quem reinveste, e por isso mora aqui no front e nao na blockchain — nenhum
+ * contrato pode prometer que voce vai clicar em "reinvestir" toda semana.
+ */
+export function aprParaApy(aprBps: bigint | undefined, periodos = 52): number | undefined {
+  if (aprBps === undefined) return undefined;
+  const apr = Number(aprBps) / 10_000;
+  return (1 + apr / periodos) ** periodos - 1;
+}
+
+/** Percentual grande sem virar notacao cientifica nem ocupar a tela inteira. */
+export function fmtPct(fracao: number | undefined, casas = 2): string {
+  if (fracao === undefined || !Number.isFinite(fracao)) return "—";
+  const pct = fracao * 100;
+  if (pct >= 1e9) return `${(pct / 1e9).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} bi%`;
+  if (pct >= 1e6) return `${(pct / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mi%`;
+  return `${pct.toLocaleString("pt-BR", { maximumFractionDigits: casas })}%`;
+}
+
+/** Segundos -> "2 d 4 h", para o prazo de validade da reserva. */
+export function fmtDuracao(segundos: bigint | undefined): string {
+  if (segundos === undefined) return "—";
+  const s = Number(segundos);
+  if (s <= 0) return "acabou";
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (d > 0) return `${d} d ${h} h`;
+  if (h > 0) return `${h} h ${m} min`;
+  return `${m} min`;
 }

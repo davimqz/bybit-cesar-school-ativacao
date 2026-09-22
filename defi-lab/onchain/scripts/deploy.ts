@@ -60,6 +60,21 @@ const LIVRO_COMPRAS: [string, string][] = [
   ["1.95", "400"],
 ];
 
+/**
+ * Cofre de staking: emissao por segundo e reserva que a paga.
+ *
+ * 0,5 CSR por segundo com 50.000 CSR de reserva da ~28 horas de rendimento —
+ * sobrevive a aula e ao ensaio da vespera sem precisar reabastecer.
+ *
+ * O APR que aparece na tela vai ser absurdo (dezenas de milhares por cento),
+ * porque a turma inteira somada deposita poucos milhares de CSR. Isso e
+ * proposital e esta explicado na tela: APR alto nao e generosidade, e emissao
+ * dividida por pouca gente. Baixar a emissao para um numero "realista" tornaria
+ * o rendimento invisivel em 15 minutos de lab, e a aula perderia o efeito.
+ */
+const STAKING_TAXA_POR_SEGUNDO = parseEther("0.5");
+const STAKING_RESERVA = parseEther("50000");
+
 // ---------------------------------------------------------------------------
 
 const { viem, networkName } = await network.connect();
@@ -80,7 +95,12 @@ if (saldo === 0n) {
 
 // --- Tokens -----------------------------------------------------------------
 
-console.log("[1/6] Publicando tokens...");
+/** Rotulo das etapas. Contador em vez de numero fixo: labs novos entram sem
+ *  renumerar o script inteiro (e sem o log mentir sobre o total). */
+let etapaAtual = 0;
+const etapa = (titulo: string) => console.log(`[${++etapaAtual}] ${titulo}`);
+
+etapa("Publicando tokens...");
 const csr = await viem.deployContract("ClassroomToken", [
   "CESAR Coin", "CSR", SUPPLY_INICIAL, FAUCET_TOKENS, FAUCET_COOLDOWN, professor.account.address,
 ]);
@@ -93,7 +113,7 @@ console.log(`      BRLX  ${brlx.address}`);
 
 // --- Faucet de gas ----------------------------------------------------------
 
-console.log("[2/6] Publicando GasFaucet...");
+etapa("Publicando GasFaucet...");
 const gasFaucet = await viem.deployContract(
   "GasFaucet",
   [GAS_DRIP, GAS_COOLDOWN, professor.account.address],
@@ -103,7 +123,7 @@ console.log(`      GasFaucet ${gasFaucet.address} (${GAS_FAUCET_SEED} ETH)`);
 
 // --- Pools ------------------------------------------------------------------
 
-console.log("[3/6] Publicando pools...");
+etapa("Publicando pools...");
 const poolFundo = await viem.deployContract("MiniAMM", [
   csr.address, brlx.address, "CESAR LP CSR/BRLX", "CLP",
 ]);
@@ -115,13 +135,21 @@ console.log(`      raso  ${poolRaso.address}`);
 
 // --- Livro de ordens --------------------------------------------------------
 
-console.log("[4/6] Publicando livro de ordens...");
+etapa("Publicando livro de ordens...");
 const orderBook = await viem.deployContract("MiniOrderBook", [csr.address, brlx.address]);
 console.log(`      livro ${orderBook.address}`);
 
+// --- Cofre de staking -------------------------------------------------------
+
+etapa("Publicando cofre de staking...");
+const staking = await viem.deployContract("MiniStaking", [
+  csr.address, STAKING_TAXA_POR_SEGUNDO, professor.account.address,
+]);
+console.log(`      staking ${staking.address}`);
+
 // --- Semeando liquidez ------------------------------------------------------
 
-console.log("[5/6] Semeando liquidez...");
+etapa("Semeando liquidez...");
 
 // Uma transacao por vez, esperando o recibo. `contract.write.*` devolve o hash
 // sem confirmar: em rede real, a transacao seguinte pede o nonce antes de a rede
@@ -157,6 +185,13 @@ for (const [preco, quantidade] of LIVRO_COMPRAS) {
   await confirmar(orderBook.write.colocar([0, parseEther(preco), parseEther(quantidade)]));
 }
 
+await confirmar(csr.write.approve([staking.address, SUPPLY_INICIAL]));
+await confirmar(staking.write.abastecer([STAKING_RESERVA]));
+console.log(
+  `      cofre abastecido -> ${formatEther(STAKING_RESERVA)} CSR de reserva,` +
+    ` ${await staking.read.segundosDeReserva()} s de rendimento no ritmo atual`,
+);
+
 const [melhorBid] = await orderBook.read.melhorCompra();
 const [melhorAsk] = await orderBook.read.melhorVenda();
 const spread = await orderBook.read.spreadBps();
@@ -167,7 +202,7 @@ console.log(
 
 // --- Gravando enderecos -----------------------------------------------------
 
-console.log("[6/6] Gravando enderecos...");
+etapa("Gravando enderecos...");
 
 // Bloco a partir do qual o front procura eventos. Sem isto, o telao e o
 // painel de impermanent loss varreriam a chain inteira a cada refresh.
@@ -186,6 +221,7 @@ const deployment = {
     poolFundo: poolFundo.address,
     poolRaso: poolRaso.address,
     orderBook: orderBook.address,
+    staking: staking.address,
   },
 };
 

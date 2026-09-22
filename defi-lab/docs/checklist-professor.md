@@ -30,10 +30,12 @@ npm test                       # a suíte tem que passar inteira
 npm run deploy:sepolia
 ```
 
-- [ ] Contratos publicados (são **seis**: CSR, BRLX, GasFaucet, dois pools e o livro)
+- [ ] Contratos publicados (são **sete**: CSR, BRLX, GasFaucet, dois pools, o livro e o cofre)
 - [ ] `npx hardhat verify` rodado em **todos** eles — os alunos vão ler o código
 - [ ] Livro de ordens semeado — o deploy faz sozinho; confirme em `/trade` que o
       spread aparece e que existem seis ordens vivas
+- [ ] Reserva do cofre de staking abastecida — o deploy coloca 50.000 CSR;
+      confirme em `/staking` que "dura mais" passa da duração da aula
 - [ ] `web/src/lib/deployment.json` atualizado (o deploy faz sozinho)
 - [ ] Front publicado (Vercel) e testado no celular, **no 4G, não no Wi-Fi**
 - [ ] CSR e BRLX adicionados na sua própria MetaMask
@@ -72,6 +74,8 @@ npm run deploy:sepolia
 | `PrecoPiorQueOLimite` | A travessia do livro passou da tolerância — o livro mudou entre a simulação e o bloco |
 | `LivroSemLiquidez` | O lado do livro está vazio. Recoloque ordens em `/trade` |
 | `AutoNegociacao` | O aluno tentou executar a própria ordem. O contrato recusa de propósito |
+| `NadaParaColher` | Não passou tempo suficiente, ou o aluno não depositou no cofre |
+| Rendimento parado em zero | A reserva do cofre secou. `/professor` → **Abastecer** |
 
 ## Parâmetros que você pode querer mexer
 
@@ -81,6 +85,10 @@ Em `onchain/scripts/deploy.ts`:
 - `GAS_DRIP` — 0,01 ETH dá umas 40 transações em Sepolia
 - `POOL_FUNDO_*` / `POOL_RASO_*` — o contraste de slippage entre os dois pools
   (hoje: **49 bps contra 1687 bps** no mesmo swap de 100 CSR)
+- `STAKING_TAXA_POR_SEGUNDO` / `STAKING_RESERVA` — ritmo da emissão e o quanto
+  existe para pagar. Hoje: 0,5 CSR/s com 50.000 de reserva, ou seja ~28 h de
+  rendimento. Baixar a emissão deixa o APR "realista" e o rendimento **invisível**
+  em 12 minutos de lab — o número absurdo é proposital e está explicado na tela.
 - `LIVRO_VENDAS` / `LIVRO_COMPRAS` — a escada inicial do livro. Cuidado: o spread
   do topo (**50 bps**) foi escolhido contra a taxa do pool (30 bps) para que o
   livro ganhe na ordem pequena e perca na grande. Alargou o spread? O pool passa

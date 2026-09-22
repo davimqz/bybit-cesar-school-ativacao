@@ -7,7 +7,19 @@ import { ConnectBar } from "@/components/ConnectBar";
 import { Card, Stat, Botao, CampoValor, Aviso, NotaDeAula } from "@/components/ui";
 import { useTx, StatusTx } from "@/hooks/useTx";
 import { usePoolData, useSaldosEAprovacoes } from "@/hooks/usePool";
-import { abis, CONTRACTS, POOLS, PROFESSOR, TOKENS, fmt, fmtBps, fmtPreco } from "@/lib/contracts";
+import { useStaking } from "@/hooks/useStaking";
+import {
+  abis,
+  CONTRACTS,
+  POOLS,
+  PROFESSOR,
+  TOKENS,
+  fmt,
+  fmtBps,
+  fmtDuracao,
+  fmtPct,
+  fmtPreco,
+} from "@/lib/contracts";
 import { paraWei } from "@/components/pool/SwapCard";
 
 /**
@@ -47,6 +59,7 @@ export default function ProfessorPage() {
       <EstadoDaOperacao />
       <WhaleSwap />
       <EstadoDoLivro />
+      <EstadoDoCofre />
       <Mintar habilitado={ehProfessor} />
     </div>
   );
@@ -330,6 +343,161 @@ function EstadoDoLivro() {
           antes e depois — quem tinha ordem parada acabou de vender sem escolher o momento.
         </NotaDeAula>
       </div>
+    </Card>
+  );
+}
+
+/**
+ * Cofre de staking: a reserva e o gesto que derruba o APR da turma inteira.
+ *
+ * O depósito baleia é o gêmeo do whale swap e da varredura do livro — cada lab
+ * tem um momento em que o professor mostra, ao vivo, que o número na tela do
+ * aluno não é uma promessa feita a ele.
+ */
+function EstadoDoCofre() {
+  const [quantia, setQuantia] = useState("50000");
+  const [recarga, setRecarga] = useState("20000");
+
+  const s = useStaking();
+  const { saldoCsr, allowanceCsr, refetch } = useSaldosEAprovacoes(CONTRACTS.staking);
+
+  const txAprovar = useTx();
+  const txBaleia = useTx();
+  const txAbastecer = useTx();
+
+  const valor = paraWei(quantia);
+  const valorRecarga = paraWei(recarga);
+
+  // APR depois do depósito: mesma conta do contrato, com a base nova.
+  const aprDepois =
+    s.taxaPorSegundo !== undefined && s.totalEmStake !== undefined && valor
+      ? Number((s.taxaPorSegundo * 31_536_000n * 10_000n) / (s.totalEmStake + valor)) / 10_000
+      : undefined;
+
+  const secando = s.segundosDeReserva !== undefined && s.segundosDeReserva < 3600n;
+  const precisaAprovar =
+    (valor !== undefined || valorRecarga !== undefined) && (allowanceCsr ?? 0n) === 0n;
+
+  return (
+    <Card titulo="Cofre de staking" subtitulo="A reserva paga o rendimento — e ela acaba" destaque={secando}>
+      <dl className="grid gap-5 sm:grid-cols-4">
+        <Stat
+          rotulo="Reserva"
+          valor={fmt(s.reserva, 0)}
+          sufixo="CSR"
+          tom={secando ? "ruim" : "bom"}
+        />
+        <Stat rotulo="Dura mais" valor={fmtDuracao(s.segundosDeReserva)} tom={secando ? "ruim" : "neutro"} />
+        <Stat
+          rotulo="APR agora"
+          valor={fmtPct(s.aprBps !== undefined ? Number(s.aprBps) / 10_000 : undefined)}
+          tom="alerta"
+        />
+        <Stat rotulo="Total depositado" valor={fmt(s.totalEmStake, 0)} sufixo="CSR" />
+      </dl>
+
+      {secando && (
+        <div className="mt-4">
+          <Aviso tom="erro">
+            A reserva está no fim: o rendimento vai parar. Abasteça abaixo antes de
+            começar o lab de staking.
+          </Aviso>
+        </div>
+      )}
+
+      <div className="mt-6 grid gap-6 border-t border-slate-200 pt-6 sm:grid-cols-2">
+        <div className="space-y-3">
+          <CampoValor
+            rotulo="Depósito baleia"
+            valor={quantia}
+            onChange={setQuantia}
+            sufixo="CSR"
+            disponivel={fmt(saldoCsr)}
+          />
+          {aprDepois !== undefined && (
+            <Stat
+              rotulo="APR da turma depois disso"
+              valor={fmtPct(aprDepois)}
+              tom="ruim"
+              dica="cai na tela de todos ao mesmo tempo"
+            />
+          )}
+          <Botao
+            variante="perigo"
+            disabled={!valor || precisaAprovar || txBaleia.ocupada}
+            onClick={async () => {
+              if (!valor) return;
+              await txBaleia.enviar({
+                address: CONTRACTS.staking,
+                abi: abis.staking,
+                functionName: "depositar",
+                args: [valor],
+              });
+              refetch();
+              s.refetch();
+            }}
+          >
+            {txBaleia.ocupada ? "Depositando…" : "Depositar como baleia"}
+          </Botao>
+          <StatusTx tx={txBaleia} sucesso="APR derrubado. Peça para olharem a própria posição." />
+        </div>
+
+        <div className="space-y-3">
+          <CampoValor
+            rotulo="Abastecer a reserva"
+            valor={recarga}
+            onChange={setRecarga}
+            sufixo="CSR"
+            disponivel={fmt(saldoCsr)}
+          />
+          <Botao
+            variante="secundario"
+            disabled={!valorRecarga || precisaAprovar || txAbastecer.ocupada}
+            onClick={async () => {
+              if (!valorRecarga) return;
+              await txAbastecer.enviar({
+                address: CONTRACTS.staking,
+                abi: abis.staking,
+                functionName: "abastecer",
+                args: [valorRecarga],
+              });
+              refetch();
+              s.refetch();
+            }}
+          >
+            {txAbastecer.ocupada ? "Abastecendo…" : "Abastecer"}
+          </Botao>
+          <StatusTx tx={txAbastecer} sucesso="Reserva reforçada." />
+        </div>
+      </div>
+
+      {precisaAprovar && (
+        <div className="mt-4">
+          <Botao
+            disabled={txAprovar.ocupada}
+            onClick={async () => {
+              await txAprovar.enviar({
+                address: TOKENS.csr.address,
+                abi: abis.token,
+                functionName: "approve",
+                args: [CONTRACTS.staking, maxUint256],
+              });
+              refetch();
+            }}
+          >
+            Aprovar CSR no cofre
+          </Botao>
+          <div className="mt-3">
+            <StatusTx tx={txAprovar} sucesso="Aprovado." />
+          </div>
+        </div>
+      )}
+
+      <NotaDeAula>
+        O depósito baleia não tira nada de ninguém: o principal de cada aluno continua
+        intacto. O que ele faz é diluir a fatia — e é por isso que o rendimento cai. A
+        pergunta para a turma: alguém te avisou antes?
+      </NotaDeAula>
     </Card>
   );
 }

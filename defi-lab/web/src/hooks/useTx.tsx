@@ -90,6 +90,14 @@ function traduzirErro(erro: Error): string {
     return "O livro está cheio. Cancele uma ordem sua ou espere o mercado girar.";
   }
 
+  // --- Staking ---
+  if (/NadaParaColher/i.test(bruto)) {
+    return "Não há rendimento para colher ainda. Deposite e espere alguns segundos.";
+  }
+  if (/SaldoInsuficienteNaPosicao/i.test(bruto)) {
+    return "Você está tentando retirar mais do que tem depositado no cofre.";
+  }
+
   return bruto;
 }
 

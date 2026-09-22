@@ -1,7 +1,7 @@
-# Roteiro — Labs de Pool de Liquidez e Trade
+# Roteiro — Labs de Pool de Liquidez, Trade e Staking
 
-Duração: ~60 min (45 do lab de AMM + 15 do lab de livro de ordens). Com os
-cinco labs prontos, vira uma aula de 90 min — ver o escopo geral.
+Duração: ~72 min (45 do lab de AMM + 15 do livro de ordens + 12 do staking).
+Com os cinco labs prontos, vira uma aula de 90 min — ver o escopo geral.
 
 Abra em duas janelas: **`/telao`** no projetor e **`/professor`** na sua tela.
 
@@ -147,7 +147,40 @@ lado da venda**. As linhas desaparecem uma a uma e o spread explode no telão.
 
 ---
 
-## 6 · Fechamento (2 min)
+## 6 · De onde vem o rendimento (12 min) — lab de staking
+
+Abra `/staking`. A ordem dos cartões na tela é o argumento: a **reserva** vem
+antes do percentual, de propósito.
+
+> "O contrato promete 1,5 milhão por cento ao ano. Antes de comemorar: essa
+> reserva tem 50.000 CSR e dura 28 horas. Quem pagou por ela fui eu, ontem à
+> noite. Todo rendimento sai de algum lugar — a única pergunta útil é de onde."
+
+**Sequência:**
+
+1. Todos depositam 500 ou 1.000 CSR. O **pendente** começa a subir na tela sozinho.
+2. Mostre o campo **sua fatia do cofre**: é ela, não o depósito, que define o ganho.
+3. Alguém clica em **Reinvestir**. Nenhum token se move na carteira — e a fatia
+   cresce. É o APR virando APY na frente deles.
+
+**O momento do lab:** `/professor` → cartão **Cofre de staking** → **Depósito
+baleia** de 50.000 CSR. O painel mostra o APR que a turma vai ter *antes* de
+você clicar.
+
+O APR cai de ~1.200.000% para ~30.000% na tela de todos ao mesmo tempo, e os dez
+minutos seguintes rendem uma fração do que rendiam.
+
+> "Ninguém tirou nada de vocês: o principal está intacto. O que mudou é a fatia.
+> Rendimento em DeFi quase sempre é disputa por uma emissão fixa — e ninguém é
+> obrigado a te avisar que vai entrar na fila."
+
+Feche perguntando o que acontece quando a reserva zerar. O contrato tem a
+resposta: emissão para, APR vira zero, e o depósito continua lá — intacto e
+rendendo nada.
+
+---
+
+## 7 · Fechamento (2 min)
 
 Volte à home e mostre a lista de contratos, cada um linkado no Etherscan.
 
@@ -166,4 +199,5 @@ Volte à home e mostre a lista de contratos, cada um linkado no Etherscan.
 | Wi-Fi da sala caiu | Vídeo do ensaio — grave na véspera, custa 10 minutos |
 | `GasFaucet` secou no meio | Mande ETH direto para o endereço do faucet; o saldo atualiza na hora |
 | Livro de ordens zerado | `/trade` com a sua carteira: três ordens de cada lado em volta de 2,00 devolvem o lab |
+| Reserva do cofre secou | `/professor` → **Abastecer** no cartão do cofre; o rendimento volta no mesmo bloco |
 | Aluno com carteira travada | Ele acompanha em dupla; a tela do `/telao` mantém todo mundo no mesmo assunto |

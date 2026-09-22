@@ -23,10 +23,12 @@ defi-lab/
 | `GasFaucet` — distribui ETH de testnet para a turma | pronto |
 | `MiniAMM` — pool `x·y=k`, taxa 0,3%, shares de LP | pronto |
 | `MiniOrderBook` — livro custodiado, prioridade preço-tempo | pronto |
+| `MiniStaking` — emissão por segundo, reserva finita, APR × APY | pronto |
 | Lab de **pool de liquidez** (swap, LP, slippage, IL, curva ao vivo) | pronto |
 | Lab de **trade** (livro ao vivo, spread, travessia, maker × taker) | pronto |
+| Lab de **staking** (de onde vem o rendimento, diluição, reinvestir) | pronto |
 | Página de faucet, telão e painel do professor | pronto |
-| Labs de staking, escrow e crowdfunding | a construir |
+| Labs de escrow e crowdfunding | a construir |
 
 ## Começando (ensaio local)
 

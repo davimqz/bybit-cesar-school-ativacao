@@ -19,6 +19,7 @@ const CONTRATOS = {
   miniAmm: "contracts/amm/MiniAMM.sol/MiniAMM.json",
   gasFaucet: "contracts/utils/GasFaucet.sol/GasFaucet.json",
   miniOrderBook: "contracts/orderbook/MiniOrderBook.sol/MiniOrderBook.json",
+  miniStaking: "contracts/staking/MiniStaking.sol/MiniStaking.json",
 };
 
 const partes = [
